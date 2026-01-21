@@ -56,6 +56,12 @@ const templates: { id: CVTemplate; name: string; description: string; colors: st
     description: 'Sophistiqué et raffiné',
     colors: ['bg-slate-700', 'bg-amber-600'],
   },
+  {
+    id: 'ats',
+    name: 'ATS-Friendly',
+    description: 'Optimisé pour robots recruteurs',
+    colors: ['bg-black', 'bg-white'],
+  },
 ];
 
 export function TemplateSelector({ selected, onChange }: TemplateSelectorProps) {

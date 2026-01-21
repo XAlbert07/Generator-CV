@@ -7,7 +7,7 @@ import { MinimalistTemplate } from './templates/MinimalistTemplate';
 import { ProfessionalTemplate } from './templates/ProfessionalTemplate';
 import { CorporateTemplate } from './templates/CorporateTemplate';
 import { ElegantTemplate } from './templates/ElegantTemplate';
-
+import { ATSTemplate } from './templates/ATSTemplate';
 interface CVPreviewProps {
   data: CVData;
   template: CVTemplate;
@@ -32,6 +32,8 @@ export function CVPreview({ data, template }: CVPreviewProps) {
         return <CorporateTemplate data={data} />;
       case 'elegant':
         return <ElegantTemplate data={data} />;
+      case 'ats':
+        return <ATSTemplate data={data} />;
       default:
         return <ModernTemplate data={data} />;
     }

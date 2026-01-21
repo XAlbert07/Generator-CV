@@ -28,7 +28,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           <Label htmlFor="firstName">Prénom</Label>
           <Input
             id="firstName"
-            placeholder="Jean"
+            placeholder="Albert"
             value={data.firstName}
             onChange={(e) => onChange({ firstName: e.target.value })}
           />
@@ -37,7 +37,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           <Label htmlFor="lastName">Nom</Label>
           <Input
             id="lastName"
-            placeholder="Dupont"
+            placeholder="Sama"
             value={data.lastName}
             onChange={(e) => onChange({ lastName: e.target.value })}
           />
@@ -48,7 +48,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
         <Label htmlFor="title">Titre professionnel</Label>
         <Input
           id="title"
-          placeholder="Développeur Full Stack"
+          placeholder="Développeur web"
           value={data.title}
           onChange={(e) => onChange({ title: e.target.value })}
         />
@@ -63,7 +63,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           <Input
             id="email"
             type="email"
-            placeholder="jean.dupont@email.com"
+            placeholder="albert.sama@email.com"
             value={data.email}
             onChange={(e) => onChange({ email: e.target.value })}
           />
@@ -75,7 +75,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           </Label>
           <Input
             id="phone"
-            placeholder="+33 6 12 34 56 78"
+            placeholder="+226 04 37 44 34"
             value={data.phone}
             onChange={(e) => onChange({ phone: e.target.value })}
           />
@@ -89,7 +89,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
         </Label>
         <Input
           id="address"
-          placeholder="Paris, France"
+          placeholder="Koudougou, Burkina Faso"
           value={data.address}
           onChange={(e) => onChange({ address: e.target.value })}
         />
@@ -103,7 +103,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           </Label>
           <Input
             id="linkedin"
-            placeholder="linkedin.com/in/jeandupont"
+            placeholder="linkedin.com/in/albertsama"
             value={data.linkedin || ''}
             onChange={(e) => onChange({ linkedin: e.target.value })}
           />
@@ -115,7 +115,7 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
           </Label>
           <Input
             id="website"
-            placeholder="www.jeandupont.com"
+            placeholder="www.albertsama.com"
             value={data.website || ''}
             onChange={(e) => onChange({ website: e.target.value })}
           />

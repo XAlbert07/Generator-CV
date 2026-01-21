@@ -10,6 +10,7 @@ import { MinimalistTemplate } from '@/components/cv/templates/MinimalistTemplate
 import { ProfessionalTemplate } from '@/components/cv/templates/ProfessionalTemplate';
 import { CorporateTemplate } from '@/components/cv/templates/CorporateTemplate';
 import { ElegantTemplate } from '@/components/cv/templates/ElegantTemplate';
+import { ATSTemplate } from '@/components/cv/templates/ATSTemplate';
 
 interface FullScreenPreviewProps {
   isOpen: boolean;
@@ -47,6 +48,8 @@ export function FullScreenPreview({
         return <CorporateTemplate data={cvData} />;
       case 'elegant':
         return <ElegantTemplate data={cvData} />;
+      case 'ats':
+        return <ATSTemplate data={cvData} />;
       default:
         return <ModernTemplate data={cvData} />;
     }

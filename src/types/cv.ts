@@ -51,7 +51,17 @@ export interface CVData {
   languages: Language[];
 }
 
-export type CVTemplate = 'modern' | 'classic' | 'creative' | 'executive' | 'minimalist' | 'professional' | 'corporate' | 'elegant';
+
+export interface CVVersion {
+  id: string;
+  name: string;
+  template: CVTemplate;
+  data: CVData;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CVTemplate = 'modern' | 'classic' | 'creative' | 'executive' | 'minimalist' | 'professional' | 'corporate' | 'elegant' | 'ats';
 
 export const defaultCVData: CVData = {
   personalInfo: {
@@ -71,3 +81,13 @@ export const defaultCVData: CVData = {
   skills: [],
   languages: [],
 };
+
+
+export const createNewVersion = (name: string, template: CVTemplate = 'modern'): CVVersion => ({
+  id: crypto.randomUUID(),
+  name,
+  template,
+  data: defaultCVData,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});

@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { useCVData } from '@/hooks/useCVData';
+import { defaultCVData } from '@/types/cv';
+import { useCVVersions } from '@/hooks/useCVVersions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileLayout } from '@/components/cv/mobile/MobileLayout';
+import { VersionsManager } from '@/components/cv/VersionsManager';
 import { PersonalInfoForm } from '@/components/cv/PersonalInfoForm';
 import { ExperienceForm } from '@/components/cv/ExperienceForm';
 import { EducationForm } from '@/components/cv/EducationForm';
@@ -17,29 +19,165 @@ import { toast } from 'sonner';
 
 export default function CVGenerator() {
   const {
-    cvData,
-    template,
-    setTemplate,
-    updatePersonalInfo,
-    addExperience,
-    updateExperience,
-    removeExperience,
-    addEducation,
-    updateEducation,
-    removeEducation,
-    addSkill,
-    updateSkill,
-    removeSkill,
-    addLanguage,
-    updateLanguage,
-    removeLanguage,
-    resetCV,
-  } = useCVData();
+    versions,
+    activeVersion,
+    createVersion,
+    duplicateVersion,
+    renameVersion,
+    deleteVersion,
+    switchVersion,
+    updateActiveVersionData,
+    updateActiveVersionTemplate,
+  } = useCVVersions();
+
+  const cvData = activeVersion?.data || defaultCVData;
+  const template = activeVersion?.template || 'modern';
 
   const isMobile = useIsMobile();
   const [showPreview, setShowPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Helper functions pour mettre à jour les données
+  const updatePersonalInfo = (info: Partial<typeof cvData.personalInfo>) => {
+    updateActiveVersionData({
+      ...cvData,
+      personalInfo: { ...cvData.personalInfo, ...info },
+    });
+  };
+
+  const addExperience = () => {
+    updateActiveVersionData({
+      ...cvData,
+      experiences: [
+        ...cvData.experiences,
+        {
+          id: crypto.randomUUID(),
+          company: '',
+          position: '',
+          startDate: '',
+          endDate: '',
+          current: false,
+          description: '',
+        },
+      ],
+    });
+  };
+
+  const updateExperience = (id: string, data: any) => {
+    updateActiveVersionData({
+      ...cvData,
+      experiences: cvData.experiences.map(exp =>
+        exp.id === id ? { ...exp, ...data } : exp
+      ),
+    });
+  };
+
+  const removeExperience = (id: string) => {
+    updateActiveVersionData({
+      ...cvData,
+      experiences: cvData.experiences.filter(exp => exp.id !== id),
+    });
+  };
+
+  const addEducation = () => {
+    updateActiveVersionData({
+      ...cvData,
+      education: [
+        ...cvData.education,
+        {
+          id: crypto.randomUUID(),
+          school: '',
+          degree: '',
+          field: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
+    });
+  };
+
+  const updateEducation = (id: string, data: any) => {
+    updateActiveVersionData({
+      ...cvData,
+      education: cvData.education.map(edu =>
+        edu.id === id ? { ...edu, ...data } : edu
+      ),
+    });
+  };
+
+  const removeEducation = (id: string) => {
+    updateActiveVersionData({
+      ...cvData,
+      education: cvData.education.filter(edu => edu.id !== id),
+    });
+  };
+
+  const addSkill = () => {
+    updateActiveVersionData({
+      ...cvData,
+      skills: [
+        ...cvData.skills,
+        { id: crypto.randomUUID(), name: '', level: 3 },
+      ],
+    });
+  };
+
+  const updateSkill = (id: string, data: any) => {
+    updateActiveVersionData({
+      ...cvData,
+      skills: cvData.skills.map(skill =>
+        skill.id === id ? { ...skill, ...data } : skill
+      ),
+    });
+  };
+
+  const removeSkill = (id: string) => {
+    updateActiveVersionData({
+      ...cvData,
+      skills: cvData.skills.filter(skill => skill.id !== id),
+    });
+  };
+
+  const addLanguage = () => {
+    updateActiveVersionData({
+      ...cvData,
+      languages: [
+        ...cvData.languages,
+        { id: crypto.randomUUID(), name: '', level: 'Intermédiaire' },
+      ],
+    });
+  };
+
+  const updateLanguage = (id: string, data: any) => {
+    updateActiveVersionData({
+      ...cvData,
+      languages: cvData.languages.map(lang =>
+        lang.id === id ? { ...lang, ...data } : lang
+      ),
+    });
+  };
+
+  const removeLanguage = (id: string) => {
+    updateActiveVersionData({
+      ...cvData,
+      languages: cvData.languages.filter(lang => lang.id !== id),
+    });
+  };
+
+  const resetCV = () => {
+    if (confirm('Réinitialiser cette version ?')) {
+      updateActiveVersionData({
+        personalInfo: {},
+        experiences: [],
+        education: [],
+        skills: [],
+        languages: [],
+      } as any);
+      toast.info('Version réinitialisée');
+    }
+  };
 
   // Calculate preview scale based on container width
   useEffect(() => {
@@ -113,7 +251,7 @@ export default function CVGenerator() {
       <MobileLayout
         cvData={cvData}
         template={template}
-        setTemplate={setTemplate}
+        setTemplate={updateActiveVersionTemplate}
         updatePersonalInfo={updatePersonalInfo}
         addExperience={addExperience}
         updateExperience={updateExperience}
@@ -128,6 +266,13 @@ export default function CVGenerator() {
         updateLanguage={updateLanguage}
         removeLanguage={removeLanguage}
         resetCV={resetCV}
+        versions={versions}
+      activeVersion={activeVersion}
+      onCreateVersion={createVersion}
+      onDuplicateVersion={duplicateVersion}
+      onRenameVersion={renameVersion}
+      onDeleteVersion={deleteVersion}
+      onSwitchVersion={switchVersion}
       />
     );
   }
@@ -138,15 +283,26 @@ export default function CVGenerator() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
         <div className="container py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <FileText className="w-6 h-6 text-primary" />
             <h1 className="text-lg font-semibold">CV Pro</h1>
+            
+            {/* Versions Manager */}
+            <VersionsManager
+              versions={versions}
+              activeVersion={activeVersion}
+              onCreateVersion={createVersion}
+              onDuplicateVersion={duplicateVersion}
+              onRenameVersion={renameVersion}
+              onDeleteVersion={deleteVersion}
+              onSwitchVersion={switchVersion}
+            />
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleReset}
+              onClick={resetCV}
               className="text-muted-foreground"
             >
               <RotateCcw className="w-4 h-4 mr-1" />
@@ -178,7 +334,7 @@ export default function CVGenerator() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Form Section */}
           <div className={`flex-1 space-y-4 ${showPreview ? 'hidden lg:block' : ''}`}>
-            <TemplateSelector selected={template} onChange={setTemplate} />
+            <TemplateSelector selected={template} onChange={updateActiveVersionTemplate} />
             
             <Tabs defaultValue="personal" className="w-full">
               <TabsList className="w-full grid grid-cols-4 mb-4">

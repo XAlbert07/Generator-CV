@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CVData, CVTemplate } from '@/types/cv';
+import { CVVersion } from '@/types/cv';
 import { PersonalInfoForm } from '@/components/cv/PersonalInfoForm';
 import { ExperienceForm } from '@/components/cv/ExperienceForm';
 import { EducationForm } from '@/components/cv/EducationForm';
@@ -9,14 +10,14 @@ import { BottomNavigation } from '@/components/cv/mobile/BottomNavigation';
 import { FullScreenPreview } from '@/components/cv/mobile/FullScreenPreview';
 import { FloatingPreviewButton } from '@/components/cv/mobile/FloatingPreviewButton';
 import { ProgressBar } from '@/components/cv/mobile/ProgressBar';
-import { CVPreview } from '@/components/cv/CVPreview';  // ✅ Bon chemin
+import { MobileVersionsPanel } from '@/components/cv/mobile/MobileVersionsPanel';
 import { Button } from '@/components/ui/button';
 import { Download, RotateCcw, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-type MobileSection = 'template' | 'personal' | 'experience' | 'education' | 'skills';
+type MobileSection = 'versions' | 'template' | 'personal' | 'experience' | 'education' | 'skills';
 
 interface MobileLayoutProps {
   cvData: CVData;
@@ -36,6 +37,14 @@ interface MobileLayoutProps {
   updateLanguage: (id: string, data: Partial<CVData['languages'][0]>) => void;
   removeLanguage: (id: string) => void;
   resetCV: () => void;
+  // Nouvelles props pour la gestion de versions
+  versions: CVVersion[];
+  activeVersion: CVVersion;
+  onCreateVersion: (name: string) => void;
+  onDuplicateVersion: (versionId: string, newName?: string) => void;
+  onRenameVersion: (versionId: string, newName: string) => void;
+  onDeleteVersion: (versionId: string) => void;
+  onSwitchVersion: (versionId: string) => void;
 }
 
 export function MobileLayout({
@@ -56,8 +65,15 @@ export function MobileLayout({
   updateLanguage,
   removeLanguage,
   resetCV,
+  versions,
+  activeVersion,
+  onCreateVersion,
+  onDuplicateVersion,
+  onRenameVersion,
+  onDeleteVersion,
+  onSwitchVersion,
 }: MobileLayoutProps) {
-  const [activeSection, setActiveSection] = useState<MobileSection>('template');
+  const [activeSection, setActiveSection] = useState<MobileSection>('versions');
   const [showPreview, setShowPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -143,6 +159,19 @@ export function MobileLayout({
 
   const renderSection = () => {
     switch (activeSection) {
+      case 'versions':
+        return (
+          <MobileVersionsPanel
+            versions={versions}
+            activeVersion={activeVersion}
+            onCreateVersion={onCreateVersion}
+            onDuplicateVersion={onDuplicateVersion}
+            onRenameVersion={onRenameVersion}
+            onDeleteVersion={onDeleteVersion}
+            onSwitchVersion={onSwitchVersion}
+          />
+        );
+      
       case 'template':
         return <TemplateSelector selected={template} onChange={setTemplate} />;
       
@@ -198,7 +227,12 @@ export function MobileLayout({
       {/* Header */}
       <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border">
         <div className="container py-3 flex items-center justify-between">
-          <h1 className="text-lg font-semibold">CV Pro</h1>
+          <div>
+            <h1 className="text-lg font-semibold">CV Pro</h1>
+            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+              {activeVersion.name}
+            </p>
+          </div>
           <Button
             variant="ghost"
             size="sm"
