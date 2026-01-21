@@ -135,3 +135,4 @@ export function PersonalInfoForm({ data, onChange }: PersonalInfoFormProps) {
     </div>
   );
 }
+
