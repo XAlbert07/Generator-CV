@@ -1,16 +1,18 @@
 import { useState } from 'react';
-import { CVData, CVTemplate } from '@/types/cv';
+import { CVData, CVTemplate, type CVSectionId } from '@/types/cv';
 import { CVVersion } from '@/types/cv';
 import { PersonalInfoForm } from '@/components/cv/PersonalInfoForm';
 import { ExperienceForm } from '@/components/cv/ExperienceForm';
 import { EducationForm } from '@/components/cv/EducationForm';
 import { SkillsForm } from '@/components/cv/SkillsForm';
 import { TemplateSelector } from '@/components/cv/TemplateSelector';
+import { LayoutOrganizer } from '@/components/cv/LayoutOrganizer';
 import { BottomNavigation } from '@/components/cv/mobile/BottomNavigation';
 import { FullScreenPreview } from '@/components/cv/mobile/FullScreenPreview';
 import { FloatingPreviewButton } from '@/components/cv/mobile/FloatingPreviewButton';
 import { ProgressBar } from '@/components/cv/mobile/ProgressBar';
 import { MobileVersionsPanel } from '@/components/cv/mobile/MobileVersionsPanel';
+import { ExportDialog } from '@/components/cv/export/ExportDialog';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Download, RotateCcw, Loader2 } from 'lucide-react';
@@ -24,6 +26,11 @@ interface MobileLayoutProps {
   cvData: CVData;
   template: CVTemplate;
   setTemplate: (template: CVTemplate) => void;
+  sectionOrder: CVSectionId[];
+  setSectionOrder: (order: CVSectionId[]) => void;
+  targetRole: string;
+  setTargetRole: (value: string) => void;
+  setCvData: (data: CVData) => void;
   updatePersonalInfo: (data: Partial<CVData['personalInfo']>) => void;
   addExperience: () => void;
   updateExperience: (id: string, data: Partial<CVData['experiences'][0]>) => void;
@@ -46,12 +53,18 @@ interface MobileLayoutProps {
   onRenameVersion: (versionId: string, newName: string) => void;
   onDeleteVersion: (versionId: string) => void;
   onSwitchVersion: (versionId: string) => void;
+  defaultFileName: string;
 }
 
 export function MobileLayout({
   cvData,
   template,
   setTemplate,
+  sectionOrder,
+  setSectionOrder,
+  targetRole,
+  setTargetRole,
+  setCvData,
   updatePersonalInfo,
   addExperience,
   updateExperience,
@@ -73,9 +86,11 @@ export function MobileLayout({
   onRenameVersion,
   onDeleteVersion,
   onSwitchVersion,
+  defaultFileName,
 }: MobileLayoutProps) {
   const [activeSection, setActiveSection] = useState<MobileSection>('versions');
   const [showPreview, setShowPreview] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
   // Calculate completion progress
@@ -174,7 +189,19 @@ export function MobileLayout({
         );
       
       case 'template':
-        return <TemplateSelector selected={template} onChange={setTemplate} />;
+        return (
+          <div className="space-y-4">
+            <TemplateSelector selected={template} onChange={setTemplate} />
+            <LayoutOrganizer
+              cvData={cvData}
+              onCvDataChange={setCvData}
+              sectionOrder={sectionOrder}
+              onSectionOrderChange={setSectionOrder}
+              targetRole={targetRole}
+              onTargetRoleChange={setTargetRole}
+            />
+          </div>
+        );
       
       case 'personal':
         return (
@@ -278,8 +305,16 @@ export function MobileLayout({
         onClose={() => setShowPreview(false)}
         cvData={cvData}
         template={template}
-        onExport={handleExportPDF}
-        isExporting={isExporting}
+        sectionOrder={sectionOrder}
+        onExport={() => setShowExport(true)}
+      />
+
+      <ExportDialog
+        open={showExport}
+        onOpenChange={setShowExport}
+        cvData={cvData}
+        visualElementId="cv-preview-mobile"
+        defaultFilename={defaultFileName}
       />
     </div>
   );

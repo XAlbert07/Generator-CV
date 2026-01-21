@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { defaultCVData } from '@/types/cv';
+import { defaultCVData, defaultSectionOrder } from '@/types/cv';
 import { useCVVersions } from '@/hooks/useCVVersions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MobileLayout } from '@/components/cv/mobile/MobileLayout';
@@ -11,11 +9,14 @@ import { ExperienceForm } from '@/components/cv/ExperienceForm';
 import { EducationForm } from '@/components/cv/EducationForm';
 import { SkillsForm } from '@/components/cv/SkillsForm';
 import { TemplateSelector } from '@/components/cv/TemplateSelector';
+import { LayoutOrganizer } from '@/components/cv/LayoutOrganizer';
 import { CVPreview } from '@/components/cv/CVPreview';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { ExportDialog } from '@/components/cv/export/ExportDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Eye, FileText, RotateCcw, Loader2 } from 'lucide-react';
+import { Download, Eye, FileText, RotateCcw } from 'lucide-react';
+
 import { toast } from 'sonner';
 
 export default function CVGenerator() {
@@ -28,15 +29,18 @@ export default function CVGenerator() {
     deleteVersion,
     switchVersion,
     updateActiveVersionData,
+    updateActiveVersion,
     updateActiveVersionTemplate,
   } = useCVVersions();
 
   const cvData = activeVersion?.data || defaultCVData;
   const template = activeVersion?.template || 'modern';
+  const sectionOrder = activeVersion?.sectionOrder || defaultSectionOrder;
+  const targetRole = activeVersion?.targetRole || '';
 
   const isMobile = useIsMobile();
   const [showPreview, setShowPreview] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Helper functions pour mettre à jour les données
@@ -198,46 +202,12 @@ export default function CVGenerator() {
     return () => window.removeEventListener('resize', updateScale);
   }, [showPreview]);
 
-  const handleExportPDF = async () => {
-    setIsExporting(true);
-    
-    try {
-      const element = document.getElementById('cv-preview');
-      if (!element) throw new Error('Preview not found');
-
-      element.style.transform = 'scale(1)';
-      
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      
-      const fileName = `CV_${cvData.personalInfo.firstName}_${cvData.personalInfo.lastName}`.replace(/\s+/g, '_') || 'Mon_CV';
-      pdf.save(`${fileName}.pdf`);
-
-      element.style.transform = '';
-      
-      toast.success('CV téléchargé avec succès !');
-    } catch (error) {
-      console.error('Export error:', error);
-      toast.error('Erreur lors de l\'export. Veuillez réessayer.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
+  const defaultFileName = (
+    `CV_${cvData.personalInfo.firstName}_${cvData.personalInfo.lastName}_${activeVersion?.name || ''}`
+  )
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'Mon_CV';
 
   const handleReset = () => {
     if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) {
@@ -253,6 +223,11 @@ export default function CVGenerator() {
         cvData={cvData}
         template={template}
         setTemplate={updateActiveVersionTemplate}
+        sectionOrder={sectionOrder}
+        setSectionOrder={(order) => updateActiveVersion({ sectionOrder: order })}
+        targetRole={targetRole}
+        setTargetRole={(value) => updateActiveVersion({ targetRole: value })}
+        setCvData={updateActiveVersionData}
         updatePersonalInfo={updatePersonalInfo}
         addExperience={addExperience}
         updateExperience={updateExperience}
@@ -274,6 +249,7 @@ export default function CVGenerator() {
       onRenameVersion={renameVersion}
       onDeleteVersion={deleteVersion}
       onSwitchVersion={switchVersion}
+      defaultFileName={defaultFileName}
       />
     );
   }
@@ -319,13 +295,9 @@ export default function CVGenerator() {
               <Eye className="w-4 h-4 mr-1" />
               {showPreview ? 'Formulaire' : 'Aperçu'}
             </Button>
-            <Button onClick={handleExportPDF} disabled={isExporting} size="sm">
-              {isExporting ? (
-                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4 mr-1" />
-              )}
-              Télécharger PDF
+            <Button onClick={() => setShowExport(true)} size="sm">
+              <Download className="w-4 h-4 mr-1" />
+              Exporter
             </Button>
           </div>
         </div>
@@ -337,6 +309,14 @@ export default function CVGenerator() {
           {/* Form Section */}
           <div className={`flex-1 space-y-4 ${showPreview ? 'hidden lg:block' : ''}`}>
             <TemplateSelector selected={template} onChange={updateActiveVersionTemplate} />
+            <LayoutOrganizer
+              cvData={cvData}
+              onCvDataChange={updateActiveVersionData}
+              sectionOrder={sectionOrder}
+              onSectionOrderChange={(order) => updateActiveVersion({ sectionOrder: order })}
+              targetRole={targetRole}
+              onTargetRoleChange={(value) => updateActiveVersion({ targetRole: value })}
+            />
             
             <Tabs defaultValue="personal" className="w-full">
               <TabsList className="w-full grid grid-cols-4 mb-4">
@@ -393,12 +373,20 @@ export default function CVGenerator() {
           >
             <div className="sticky top-20">
               <div className="bg-muted/50 rounded-xl p-4 overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
-                <CVPreview data={cvData} template={template} />
+                <CVPreview data={cvData} template={template} sectionOrder={sectionOrder} />
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      <ExportDialog
+        open={showExport}
+        onOpenChange={setShowExport}
+        cvData={cvData}
+        visualElementId="cv-preview"
+        defaultFilename={defaultFileName}
+      />
     </div>
   );
 }

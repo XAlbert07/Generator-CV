@@ -1,8 +1,10 @@
-import { CVData } from '@/types/cv';
+import React from 'react';
+import { CVData, type CVSectionId, defaultSectionOrder } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
 
 interface ExecutiveTemplateProps {
   data: CVData;
+  sectionOrder?: CVSectionId[];
 }
 
 function formatDate(date: string): string {
@@ -12,9 +14,12 @@ function formatDate(date: string): string {
   return `${months[parseInt(month) - 1]} ${year}`;
 }
 
-export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
+export function ExecutiveTemplate({ data, sectionOrder }: ExecutiveTemplateProps) {
   const { personalInfo, experiences, education, skills, languages } = data;
   const hasContent = personalInfo.firstName || personalInfo.lastName || experiences.length > 0;
+  const order = (sectionOrder?.length ? sectionOrder : defaultSectionOrder).filter(
+    (s): s is CVSectionId => !!s
+  );
 
   return (
     <div 
@@ -84,89 +89,85 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
       </div>
 
       <div className="px-8 pb-8 space-y-5">
-        {/* Summary */}
-        {personalInfo.summary && (
-          <section>
-            <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-2 border-b border-blue-900 pb-1">
-              Profil professionnel
-            </h2>
-            <p className="text-gray-700 text-xs leading-relaxed">{personalInfo.summary}</p>
-          </section>
-        )}
+        {(() => {
+          const summarySection = personalInfo.summary ? (
+            <section>
+              <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-2 border-b border-blue-900 pb-1">
+                Profil professionnel
+              </h2>
+              <p className="text-gray-700 text-xs leading-relaxed">{personalInfo.summary}</p>
+            </section>
+          ) : null;
 
-        {/* Experience */}
-        {experiences.length > 0 && (
-          <section>
-            <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3 border-b border-blue-900 pb-1">
-              Expérience professionnelle
-            </h2>
-            <div className="space-y-4">
-              {experiences.map((exp) => (
-                <div key={exp.id} className="relative pl-4 border-l-2 border-blue-200">
-                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-900" />
-                  <div className="flex justify-between items-start mb-1">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm">{exp.position || 'Poste'}</h3>
-                      <p className="text-blue-900 font-semibold text-xs">{exp.company || 'Entreprise'}</p>
+          const experienceSection = experiences.length > 0 ? (
+            <section>
+              <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3 border-b border-blue-900 pb-1">
+                Expérience professionnelle
+              </h2>
+              <div className="space-y-4">
+                {experiences.map((exp) => (
+                  <div key={exp.id} className="relative pl-4 border-l-2 border-blue-200">
+                    <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-900" />
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-sm">{exp.position || 'Poste'}</h3>
+                        <p className="text-blue-900 font-semibold text-xs">{exp.company || 'Entreprise'}</p>
+                      </div>
+                      <p className="text-gray-600 text-xs font-medium whitespace-nowrap ml-4">
+                        {formatDate(exp.startDate)} - {exp.current ? 'Présent' : formatDate(exp.endDate)}
+                      </p>
                     </div>
-                    <p className="text-gray-600 text-xs font-medium whitespace-nowrap ml-4">
-                      {formatDate(exp.startDate)} - {exp.current ? 'Présent' : formatDate(exp.endDate)}
-                    </p>
+                    {exp.description && (
+                      <p className="text-gray-700 text-xs leading-relaxed mt-2 whitespace-pre-line">{exp.description}</p>
+                    )}
                   </div>
-                  {exp.description && (
-                    <p className="text-gray-700 text-xs leading-relaxed mt-2 whitespace-pre-line">{exp.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          ) : null;
 
-        {/* Education */}
-        {education.length > 0 && (
-          <section>
-            <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3 border-b border-blue-900 pb-1">
-              Formation
-            </h2>
-            <div className="space-y-3">
-              {education.map((edu) => (
-                <div key={edu.id} className="relative pl-4 border-l-2 border-blue-200">
-                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-900" />
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm">
-                        {edu.degree || 'Diplôme'}{edu.field && ` - ${edu.field}`}
-                      </h3>
-                      <p className="text-blue-900 font-semibold text-xs">{edu.school || 'Établissement'}</p>
+          const educationSection = education.length > 0 ? (
+            <section>
+              <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3 border-b border-blue-900 pb-1">
+                Formation
+              </h2>
+              <div className="space-y-3">
+                {education.map((edu) => (
+                  <div key={edu.id} className="relative pl-4 border-l-2 border-blue-200">
+                    <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-blue-900" />
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-sm">
+                          {edu.degree || 'Diplôme'}{edu.field && ` - ${edu.field}`}
+                        </h3>
+                        <p className="text-blue-900 font-semibold text-xs">{edu.school || 'Établissement'}</p>
+                      </div>
+                      <p className="text-gray-600 text-xs font-medium whitespace-nowrap ml-4">
+                        {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                      </p>
                     </div>
-                    <p className="text-gray-600 text-xs font-medium whitespace-nowrap ml-4">
-                      {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
-                    </p>
+                    {edu.description && (
+                      <p className="text-gray-700 text-xs mt-1 leading-relaxed">{edu.description}</p>
+                    )}
                   </div>
-                  {edu.description && (
-                    <p className="text-gray-700 text-xs mt-1 leading-relaxed">{edu.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          ) : null;
 
-        {/* Skills & Languages */}
-        <div className="grid grid-cols-2 gap-6">
-          {skills.length > 0 && (
+          const skillsSection = skills.length > 0 ? (
             <section>
               <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3 border-b border-blue-900 pb-1">
                 Compétences
               </h2>
               <div className="space-y-2">
                 {skills.map((skill) => (
-                  <div 
-                    key={skill.id} 
+                  <div
+                    key={skill.id}
                     className="px-3 py-2 rounded text-xs text-gray-700 font-medium"
                     style={{
                       background: 'rgba(30, 58, 138, 0.08)',
-                      borderLeft: '3px solid #1e3a8a'
+                      borderLeft: '3px solid #1e3a8a',
                     }}
                   >
                     {skill.name || 'Compétence'}
@@ -174,9 +175,9 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
                 ))}
               </div>
             </section>
-          )}
+          ) : null;
 
-          {languages.length > 0 && (
+          const languagesSection = languages.length > 0 ? (
             <section>
               <h2 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3 border-b border-blue-900 pb-1">
                 Langues
@@ -190,8 +191,48 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
                 ))}
               </div>
             </section>
-          )}
-        </div>
+          ) : null;
+
+          const sectionMap: Record<CVSectionId, React.ReactNode> = {
+            summary: summarySection,
+            experience: experienceSection,
+            education: educationSection,
+            skills: skillsSection,
+            languages: languagesSection,
+          };
+
+          const blocks: React.ReactNode[] = [];
+          for (let i = 0; i < order.length; i++) {
+            const id = order[i];
+            const next = order[i + 1];
+
+            if (
+              (id === 'skills' && next === 'languages') ||
+              (id === 'languages' && next === 'skills')
+            ) {
+              const a = sectionMap[id];
+              const b = sectionMap[next];
+              if (a && b) {
+                blocks.push(
+                  <div key={`${id}-${next}`} className="grid grid-cols-2 gap-6">
+                    {a}
+                    {b}
+                  </div>
+                );
+              } else {
+                if (a) blocks.push(<React.Fragment key={id}>{a}</React.Fragment>);
+                if (b) blocks.push(<React.Fragment key={next}>{b}</React.Fragment>);
+              }
+              i++;
+              continue;
+            }
+
+            const node = sectionMap[id];
+            if (node) blocks.push(<React.Fragment key={id}>{node}</React.Fragment>);
+          }
+
+          return blocks;
+        })()}
 
         {!hasContent && (
           <div className="text-center py-12 text-gray-400 text-sm">

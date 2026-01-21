@@ -51,12 +51,30 @@ export interface CVData {
   languages: Language[];
 }
 
+export type CVSectionId = 'summary' | 'experience' | 'education' | 'skills' | 'languages';
+
+export const defaultSectionOrder: CVSectionId[] = [
+  'summary',
+  'experience',
+  'education',
+  'skills',
+  'languages',
+];
+
 
 export interface CVVersion {
   id: string;
   name: string;
   template: CVTemplate;
   data: CVData;
+  /**
+   * Poste visé (optionnel). Sert de contexte pour la “priorité” et l’export.
+   */
+  targetRole?: string;
+  /**
+   * Ordre d’affichage des sections (hors en-tête infos perso).
+   */
+  sectionOrder?: CVSectionId[];
   createdAt: string;
   updatedAt: string;
 }
@@ -87,7 +105,9 @@ export const createNewVersion = (name: string, template: CVTemplate = 'modern'):
   id: crypto.randomUUID(),
   name,
   template,
-  data: defaultCVData,
+  data: structuredClone(defaultCVData),
+  targetRole: '',
+  sectionOrder: defaultSectionOrder,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 });

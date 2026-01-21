@@ -1,8 +1,10 @@
-import { CVData } from '@/types/cv';
+import React from 'react';
+import { CVData, type CVSectionId, defaultSectionOrder } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
 
 interface MinimalistTemplateProps {
   data: CVData;
+  sectionOrder?: CVSectionId[];
 }
 
 function formatDate(date: string): string {
@@ -12,9 +14,12 @@ function formatDate(date: string): string {
   return `${months[parseInt(month) - 1]} ${year}`;
 }
 
-export function MinimalistTemplate({ data }: MinimalistTemplateProps) {
+export function MinimalistTemplate({ data, sectionOrder }: MinimalistTemplateProps) {
   const { personalInfo, experiences, education, skills, languages } = data;
   const hasContent = personalInfo.firstName || personalInfo.lastName || experiences.length > 0;
+  const order = (sectionOrder?.length ? sectionOrder : defaultSectionOrder).filter(
+    (s): s is CVSectionId => !!s
+  );
 
   return (
     <div 
@@ -81,87 +86,83 @@ export function MinimalistTemplate({ data }: MinimalistTemplateProps) {
       </div>
 
       <div className="px-10 py-8 space-y-6">
-        {/* Summary */}
-        {personalInfo.summary && (
-          <section>
-            <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-3">
-              À propos
-            </h2>
-            <p className="text-gray-700 text-xs leading-relaxed max-w-3xl">{personalInfo.summary}</p>
-          </section>
-        )}
+        {(() => {
+          const summarySection = personalInfo.summary ? (
+            <section>
+              <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-3">
+                À propos
+              </h2>
+              <p className="text-gray-700 text-xs leading-relaxed max-w-3xl">{personalInfo.summary}</p>
+            </section>
+          ) : null;
 
-        {/* Experience */}
-        {experiences.length > 0 && (
-          <section>
-            <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-4">
-              Expérience
-            </h2>
-            <div className="space-y-5">
-              {experiences.map((exp) => (
-                <div key={exp.id} className="flex gap-6">
-                  <div className="flex-shrink-0 w-24 text-right">
-                    <p className="text-gray-500 text-xs font-light">
-                      {formatDate(exp.startDate)} - {exp.current ? 'Présent' : formatDate(exp.endDate)}
-                    </p>
+          const experienceSection = experiences.length > 0 ? (
+            <section>
+              <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-4">
+                Expérience
+              </h2>
+              <div className="space-y-5">
+                {experiences.map((exp) => (
+                  <div key={exp.id} className="flex gap-6">
+                    <div className="flex-shrink-0 w-24 text-right">
+                      <p className="text-gray-500 text-xs font-light">
+                        {formatDate(exp.startDate)} - {exp.current ? 'Présent' : formatDate(exp.endDate)}
+                      </p>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-0.5">{exp.position || 'Poste'}</h3>
+                      <p className="text-gray-600 text-xs mb-2">{exp.company || 'Entreprise'}</p>
+                      {exp.description && (
+                        <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-line">{exp.description}</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">{exp.position || 'Poste'}</h3>
-                    <p className="text-gray-600 text-xs mb-2">{exp.company || 'Entreprise'}</p>
-                    {exp.description && (
-                      <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-line">{exp.description}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          ) : null;
 
-        {/* Education */}
-        {education.length > 0 && (
-          <section>
-            <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-4">
-              Formation
-            </h2>
-            <div className="space-y-4">
-              {education.map((edu) => (
-                <div key={edu.id} className="flex gap-6">
-                  <div className="flex-shrink-0 w-24 text-right">
-                    <p className="text-gray-500 text-xs font-light">
-                      {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
-                    </p>
+          const educationSection = education.length > 0 ? (
+            <section>
+              <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-4">
+                Formation
+              </h2>
+              <div className="space-y-4">
+                {education.map((edu) => (
+                  <div key={edu.id} className="flex gap-6">
+                    <div className="flex-shrink-0 w-24 text-right">
+                      <p className="text-gray-500 text-xs font-light">
+                        {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                      </p>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
+                        {edu.degree || 'Diplôme'}{edu.field && ` - ${edu.field}`}
+                      </h3>
+                      <p className="text-gray-600 text-xs">{edu.school || 'Établissement'}</p>
+                      {edu.description && (
+                        <p className="text-gray-700 text-xs mt-1 leading-relaxed">{edu.description}</p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                      {edu.degree || 'Diplôme'}{edu.field && ` - ${edu.field}`}
-                    </h3>
-                    <p className="text-gray-600 text-xs">{edu.school || 'Établissement'}</p>
-                    {edu.description && (
-                      <p className="text-gray-700 text-xs mt-1 leading-relaxed">{edu.description}</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          ) : null;
 
-        {/* Skills & Languages */}
-        <div className="grid grid-cols-2 gap-8">
-          {skills.length > 0 && (
+          const skillsSection = skills.length > 0 ? (
             <section>
               <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-3">
                 Compétences
               </h2>
               <div className="space-y-2">
                 {skills.map((skill) => (
-                  <div 
-                    key={skill.id} 
+                  <div
+                    key={skill.id}
                     className="px-3 py-2 rounded text-xs text-gray-700 font-medium"
                     style={{
                       background: 'rgba(17, 24, 39, 0.05)',
-                      borderLeft: '2px solid #111827'
+                      borderLeft: '2px solid #111827',
                     }}
                   >
                     {skill.name || 'Compétence'}
@@ -169,9 +170,9 @@ export function MinimalistTemplate({ data }: MinimalistTemplateProps) {
                 ))}
               </div>
             </section>
-          )}
+          ) : null;
 
-          {languages.length > 0 && (
+          const languagesSection = languages.length > 0 ? (
             <section>
               <h2 className="text-xs font-semibold text-gray-900 uppercase tracking-widest mb-3">
                 Langues
@@ -185,8 +186,48 @@ export function MinimalistTemplate({ data }: MinimalistTemplateProps) {
                 ))}
               </div>
             </section>
-          )}
-        </div>
+          ) : null;
+
+          const sectionMap: Record<CVSectionId, React.ReactNode> = {
+            summary: summarySection,
+            experience: experienceSection,
+            education: educationSection,
+            skills: skillsSection,
+            languages: languagesSection,
+          };
+
+          const blocks: React.ReactNode[] = [];
+          for (let i = 0; i < order.length; i++) {
+            const id = order[i];
+            const next = order[i + 1];
+
+            if (
+              (id === 'skills' && next === 'languages') ||
+              (id === 'languages' && next === 'skills')
+            ) {
+              const a = sectionMap[id];
+              const b = sectionMap[next];
+              if (a && b) {
+                blocks.push(
+                  <div key={`${id}-${next}`} className="grid grid-cols-2 gap-8">
+                    {a}
+                    {b}
+                  </div>
+                );
+              } else {
+                if (a) blocks.push(<React.Fragment key={id}>{a}</React.Fragment>);
+                if (b) blocks.push(<React.Fragment key={next}>{b}</React.Fragment>);
+              }
+              i++;
+              continue;
+            }
+
+            const node = sectionMap[id];
+            if (node) blocks.push(<React.Fragment key={id}>{node}</React.Fragment>);
+          }
+
+          return blocks;
+        })()}
 
         {!hasContent && (
           <div className="text-center py-12 text-gray-400 text-sm">

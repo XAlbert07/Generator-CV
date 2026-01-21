@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { CVData, CVTemplate } from '@/types/cv';
+import { CVData, CVTemplate, type CVSectionId } from '@/types/cv';
 import { Button } from '@/components/ui/button';
-import { X, Download, Loader2, Share2 } from 'lucide-react';
+import { X, Download, Share2 } from 'lucide-react';
 import { ModernTemplate } from '@/components/cv/templates/ModernTemplate';
 import { ClassicTemplate } from '@/components/cv/templates/ClassicTemplate';
 import { CreativeTemplate } from '@/components/cv/templates/CreativeTemplate';
@@ -17,8 +17,8 @@ interface FullScreenPreviewProps {
   onClose: () => void;
   cvData: CVData;
   template: CVTemplate;
+  sectionOrder?: CVSectionId[];
   onExport: () => void;
-  isExporting: boolean;
 }
 
 export function FullScreenPreview({
@@ -26,32 +26,32 @@ export function FullScreenPreview({
   onClose,
   cvData,
   template,
+  sectionOrder,
   onExport,
-  isExporting,
 }: FullScreenPreviewProps) {
   // Render the correct template
   const renderTemplate = () => {
     switch (template) {
       case 'modern':
-        return <ModernTemplate data={cvData} />;
+        return <ModernTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'classic':
-        return <ClassicTemplate data={cvData} />;
+        return <ClassicTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'creative':
-        return <CreativeTemplate data={cvData} />;
+        return <CreativeTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'executive':
-        return <ExecutiveTemplate data={cvData} />;
+        return <ExecutiveTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'minimalist':
-        return <MinimalistTemplate data={cvData} />;
+        return <MinimalistTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'professional':
-        return <ProfessionalTemplate data={cvData} />;
+        return <ProfessionalTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'corporate':
-        return <CorporateTemplate data={cvData} />;
+        return <CorporateTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'elegant':
-        return <ElegantTemplate data={cvData} />;
+        return <ElegantTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'ats':
-        return <ATSTemplate data={cvData} />;
+        return <ATSTemplate data={cvData} sectionOrder={sectionOrder} />;
       default:
-        return <ModernTemplate data={cvData} />;
+        return <ModernTemplate data={cvData} sectionOrder={sectionOrder} />;
     }
   };
 
@@ -153,16 +153,11 @@ export function FullScreenPreview({
             </Button>
             
             <Button
-              onClick={onExport}
-              disabled={isExporting}
               size="sm"
+              onClick={onExport}
             >
-              {isExporting ? (
-                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4 mr-1" />
-              )}
-              PDF
+              <Download className="w-4 h-4 mr-1" />
+              Exporter
             </Button>
           </div>
         </div>

@@ -1,8 +1,10 @@
-import { CVData } from '@/types/cv';
+import React from 'react';
+import { CVData, type CVSectionId, defaultSectionOrder } from '@/types/cv';
 import { Mail, Phone, MapPin, Linkedin, Globe } from 'lucide-react';
 
 interface CreativeTemplateProps {
   data: CVData;
+  sectionOrder?: CVSectionId[];
 }
 
 function formatDate(date: string): string {
@@ -11,9 +13,14 @@ function formatDate(date: string): string {
   return `${month}/${year}`;
 }
 
-export function CreativeTemplate({ data }: CreativeTemplateProps) {
+export function CreativeTemplate({ data, sectionOrder }: CreativeTemplateProps) {
   const { personalInfo, experiences, education, skills, languages } = data;
   const hasContent = personalInfo.firstName || personalInfo.lastName || experiences.length > 0;
+  const order = (sectionOrder?.length ? sectionOrder : defaultSectionOrder).filter(
+    (s): s is CVSectionId => !!s
+  );
+  const sidebarOrder = order.filter((s) => s === 'skills' || s === 'languages');
+  const mainOrder = order.filter((s) => s === 'summary' || s === 'experience' || s === 'education');
 
   return (
     <div 
@@ -109,175 +116,206 @@ export function CreativeTemplate({ data }: CreativeTemplateProps) {
           )}
         </div>
 
-        {/* Skills - Elegant Cards */}
-        {skills.length > 0 && (
-          <div className="mb-7 pb-7 border-b border-slate-700">
-            <h3 className="text-xs uppercase tracking-widest font-bold mb-4" style={{ color: '#f59e0b' }}>
-              Compétences
-            </h3>
-            <div className="space-y-2">
-              {skills.map((skill) => (
-                <div 
-                  key={skill.id} 
-                  className="px-3 py-2 rounded-lg text-[10px] font-medium text-slate-200 backdrop-blur-sm"
-                  style={{
-                    background: 'rgba(248, 250, 252, 0.05)',
-                    borderLeft: '3px solid #f59e0b',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
-                  }}
-                >
-                  {skill.name || 'Compétence'}
-                </div>
-              ))}
+        {(() => {
+          const skillsBlock = skills.length > 0 ? (
+            <div className="mb-7 pb-7 border-b border-slate-700">
+              <h3 className="text-xs uppercase tracking-widest font-bold mb-4" style={{ color: '#f59e0b' }}>
+                Compétences
+              </h3>
+              <div className="space-y-2">
+                {skills.map((skill) => (
+                  <div
+                    key={skill.id}
+                    className="px-3 py-2 rounded-lg text-[10px] font-medium text-slate-200 backdrop-blur-sm"
+                    style={{
+                      background: 'rgba(248, 250, 252, 0.05)',
+                      borderLeft: '3px solid #f59e0b',
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+                    }}
+                  >
+                    {skill.name || 'Compétence'}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          ) : null;
 
-        {/* Languages - Minimalist */}
-        {languages.length > 0 && (
-          <div>
-            <h3 className="text-xs uppercase tracking-widest font-bold mb-4" style={{ color: '#f59e0b' }}>
-              Langues
-            </h3>
-            <div className="space-y-3">
-              {languages.map((lang) => (
-                <div key={lang.id}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-slate-200 text-[10px] font-semibold">{lang.name || 'Langue'}</span>
-                    <span className="text-[9px] font-medium" style={{ color: '#fbbf24' }}>{lang.level}</span>
+          const languagesBlock = languages.length > 0 ? (
+            <div>
+              <h3 className="text-xs uppercase tracking-widest font-bold mb-4" style={{ color: '#f59e0b' }}>
+                Langues
+              </h3>
+              <div className="space-y-3">
+                {languages.map((lang) => (
+                  <div key={lang.id}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-slate-200 text-[10px] font-semibold">{lang.name || 'Langue'}</span>
+                      <span className="text-[9px] font-medium" style={{ color: '#fbbf24' }}>
+                        {lang.level}
+                      </span>
+                    </div>
+                    <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width:
+                            lang.level === 'Natif'
+                              ? '100%'
+                              : lang.level === 'Courant'
+                                ? '90%'
+                                : lang.level === 'Avancé'
+                                  ? '75%'
+                                  : lang.level === 'Intermédiaire'
+                                    ? '60%'
+                                    : '40%',
+                          background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)',
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full"
-                      style={{ 
-                        width: lang.level === 'Natif' ? '100%' : 
-                               lang.level === 'Courant' ? '90%' :
-                               lang.level === 'Avancé' ? '75%' :
-                               lang.level === 'Intermédiaire' ? '60%' : '40%',
-                        background: 'linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)'
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          ) : null;
+
+          const map: Record<CVSectionId, React.ReactNode> = {
+            summary: null,
+            experience: null,
+            education: null,
+            skills: skillsBlock,
+            languages: languagesBlock,
+          };
+
+          return sidebarOrder.map((id) => map[id]).filter(Boolean);
+        })()}
       </div>
 
       {/* Main Content - Clean & Modern */}
       <div className="flex-1 p-8 space-y-6">
-        {/* Summary with Accent */}
-        {personalInfo.summary && (
-          <section>
-            <div className="flex items-center gap-3 mb-3">
-              <div 
-                className="w-1.5 h-8 rounded-full"
-                style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)' }}
-              />
-              <h2 className="text-base font-bold uppercase tracking-wider" style={{ color: '#1e293b' }}>
-                À propos
-              </h2>
-            </div>
-            <p className="text-gray-700 text-[10px] leading-relaxed pl-6">{personalInfo.summary}</p>
-          </section>
-        )}
+        {(() => {
+          const summarySection = personalInfo.summary ? (
+            <section>
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className="w-1.5 h-8 rounded-full"
+                  style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)' }}
+                />
+                <h2 className="text-base font-bold uppercase tracking-wider" style={{ color: '#1e293b' }}>
+                  À propos
+                </h2>
+              </div>
+              <p className="text-gray-700 text-[10px] leading-relaxed pl-6">{personalInfo.summary}</p>
+            </section>
+          ) : null;
 
-        {/* Experience with Timeline */}
-        {experiences.length > 0 && (
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div 
-                className="w-1.5 h-8 rounded-full"
-                style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)' }}
-              />
-              <h2 className="text-base font-bold uppercase tracking-wider" style={{ color: '#1e293b' }}>
-                Expérience Professionnelle
-              </h2>
-            </div>
-            <div className="space-y-5 relative pl-6">
-              <div 
-                className="absolute left-3 top-0 bottom-0 w-0.5 rounded-full"
-                style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 50%, #d97706 100%)' }}
-              />
-              {experiences.map((exp) => (
-                <div key={exp.id} className="pl-6 relative">
-                  <div 
-                    className="absolute left-0 top-1.5 w-3 h-3 rounded-full shadow-lg"
-                    style={{ 
-                      background: '#f59e0b',
-                      transform: 'translateX(-18px)',
-                      border: '2px solid white'
-                    }}
-                  />
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm">{exp.position || 'Poste'}</h3>
-                      <p className="font-semibold text-xs" style={{ color: '#f59e0b' }}>{exp.company || 'Entreprise'}</p>
-                    </div>
-                    <p 
-                      className="text-[10px] px-3 py-1 rounded-full font-semibold whitespace-nowrap ml-4"
-                      style={{ 
-                        background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                        color: '#92400e'
+          const experienceSection = experiences.length > 0 ? (
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-1.5 h-8 rounded-full"
+                  style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)' }}
+                />
+                <h2 className="text-base font-bold uppercase tracking-wider" style={{ color: '#1e293b' }}>
+                  Expérience Professionnelle
+                </h2>
+              </div>
+              <div className="space-y-5 relative pl-6">
+                <div
+                  className="absolute left-3 top-0 bottom-0 w-0.5 rounded-full"
+                  style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 50%, #d97706 100%)' }}
+                />
+                {experiences.map((exp) => (
+                  <div key={exp.id} className="pl-6 relative">
+                    <div
+                      className="absolute left-0 top-1.5 w-3 h-3 rounded-full shadow-lg"
+                      style={{
+                        background: '#f59e0b',
+                        transform: 'translateX(-18px)',
+                        border: '2px solid white',
                       }}
-                    >
-                      {formatDate(exp.startDate)} - {exp.current ? 'Présent' : formatDate(exp.endDate)}
-                    </p>
+                    />
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-sm">{exp.position || 'Poste'}</h3>
+                        <p className="font-semibold text-xs" style={{ color: '#f59e0b' }}>
+                          {exp.company || 'Entreprise'}
+                        </p>
+                      </div>
+                      <p
+                        className="text-[10px] px-3 py-1 rounded-full font-semibold whitespace-nowrap ml-4"
+                        style={{
+                          background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                          color: '#92400e',
+                        }}
+                      >
+                        {formatDate(exp.startDate)} - {exp.current ? 'Présent' : formatDate(exp.endDate)}
+                      </p>
+                    </div>
+                    {exp.description && (
+                      <p className="text-gray-700 text-[10px] leading-relaxed whitespace-pre-line">{exp.description}</p>
+                    )}
                   </div>
-                  {exp.description && (
-                    <p className="text-gray-700 text-[10px] leading-relaxed whitespace-pre-line">{exp.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          ) : null;
 
-        {/* Education - Clean Design */}
-        {education.length > 0 && (
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div 
-                className="w-1.5 h-8 rounded-full"
-                style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)' }}
-              />
-              <h2 className="text-base font-bold uppercase tracking-wider" style={{ color: '#1e293b' }}>
-                Formation
-              </h2>
-            </div>
-            <div className="space-y-4 pl-6">
-              {education.map((edu) => (
-                <div 
-                  key={edu.id} 
-                  className="pl-4 rounded-r-lg py-2"
-                  style={{ borderLeft: '3px solid #f59e0b', background: 'rgba(245, 158, 11, 0.03)' }}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-bold text-gray-900 text-sm">
-                        {edu.degree || 'Diplôme'}{edu.field && ` - ${edu.field}`}
-                      </h3>
-                      <p className="font-semibold text-xs" style={{ color: '#f59e0b' }}>{edu.school || 'Établissement'}</p>
+          const educationSection = education.length > 0 ? (
+            <section>
+              <div className="flex items-center gap-3 mb-4">
+                <div
+                  className="w-1.5 h-8 rounded-full"
+                  style={{ background: 'linear-gradient(180deg, #f59e0b 0%, #fbbf24 100%)' }}
+                />
+                <h2 className="text-base font-bold uppercase tracking-wider" style={{ color: '#1e293b' }}>
+                  Formation
+                </h2>
+              </div>
+              <div className="space-y-4 pl-6">
+                {education.map((edu) => (
+                  <div
+                    key={edu.id}
+                    className="pl-4 rounded-r-lg py-2"
+                    style={{ borderLeft: '3px solid #f59e0b', background: 'rgba(245, 158, 11, 0.03)' }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900 text-sm">
+                          {edu.degree || 'Diplôme'}{edu.field && ` - ${edu.field}`}
+                        </h3>
+                        <p className="font-semibold text-xs" style={{ color: '#f59e0b' }}>
+                          {edu.school || 'Établissement'}
+                        </p>
+                      </div>
+                      <p
+                        className="text-[10px] px-3 py-1 rounded-full font-semibold whitespace-nowrap ml-4"
+                        style={{
+                          background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+                          color: '#92400e',
+                        }}
+                      >
+                        {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
+                      </p>
                     </div>
-                    <p 
-                      className="text-[10px] px-3 py-1 rounded-full font-semibold whitespace-nowrap ml-4"
-                      style={{ 
-                        background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-                        color: '#92400e'
-                      }}
-                    >
-                      {formatDate(edu.startDate)} - {formatDate(edu.endDate)}
-                    </p>
+                    {edu.description && (
+                      <p className="text-gray-700 text-[10px] mt-1.5 leading-relaxed">{edu.description}</p>
+                    )}
                   </div>
-                  {edu.description && (
-                    <p className="text-gray-700 text-[10px] mt-1.5 leading-relaxed">{edu.description}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                ))}
+              </div>
+            </section>
+          ) : null;
+
+          const map: Record<CVSectionId, React.ReactNode> = {
+            summary: summarySection,
+            experience: experienceSection,
+            education: educationSection,
+            skills: null,
+            languages: null,
+          };
+
+          return mainOrder.map((id) => map[id]).filter(Boolean);
+        })()}
 
         {!hasContent && (
           <div className="text-center py-12 text-gray-400">

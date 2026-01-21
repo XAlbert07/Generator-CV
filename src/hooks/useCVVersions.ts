@@ -1,16 +1,68 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CVVersion, CVData, CVTemplate, createNewVersion, defaultCVData } from '@/types/cv';
+import {
+  CVVersion,
+  CVData,
+  CVTemplate,
+  createNewVersion,
+  defaultCVData,
+  defaultSectionOrder,
+} from '@/types/cv';
 
 const VERSIONS_KEY = 'cv-versions';
 const ACTIVE_VERSION_KEY = 'cv-active-version-id';
 
 export function useCVVersions() {
+  const normalizeVersions = useCallback((raw: unknown): CVVersion[] => {
+    if (!Array.isArray(raw)) return [];
+
+    return raw
+      .map((v: any): CVVersion | null => {
+        if (!v || typeof v !== 'object') return null;
+
+        const id = typeof v.id === 'string' ? v.id : crypto.randomUUID();
+        const name = typeof v.name === 'string' ? v.name : 'Mon CV';
+        const template = (typeof v.template === 'string' ? v.template : 'modern') as CVTemplate;
+
+        // Data
+        const data: CVData = v.data && typeof v.data === 'object'
+          ? {
+              personalInfo: { ...defaultCVData.personalInfo, ...(v.data.personalInfo || {}) },
+              experiences: Array.isArray(v.data.experiences) ? v.data.experiences : [],
+              education: Array.isArray(v.data.education) ? v.data.education : [],
+              skills: Array.isArray(v.data.skills) ? v.data.skills : [],
+              languages: Array.isArray(v.data.languages) ? v.data.languages : [],
+            }
+          : structuredClone(defaultCVData);
+
+        // Layout/meta (optional)
+        const targetRole = typeof v.targetRole === 'string' ? v.targetRole : '';
+        const sectionOrder = Array.isArray(v.sectionOrder) && v.sectionOrder.length
+          ? v.sectionOrder
+          : defaultSectionOrder;
+
+        const createdAt = typeof v.createdAt === 'string' ? v.createdAt : new Date().toISOString();
+        const updatedAt = typeof v.updatedAt === 'string' ? v.updatedAt : new Date().toISOString();
+
+        return {
+          id,
+          name,
+          template,
+          data,
+          targetRole,
+          sectionOrder,
+          createdAt,
+          updatedAt,
+        };
+      })
+      .filter(Boolean) as CVVersion[];
+  }, []);
+
   // Charger les versions depuis localStorage
   const [versions, setVersions] = useState<CVVersion[]>(() => {
     const saved = localStorage.getItem(VERSIONS_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return normalizeVersions(JSON.parse(saved));
       } catch {
         return [];
       }
@@ -110,6 +162,13 @@ export function useCVVersions() {
     }
   }, [activeVersion, updateVersion]);
 
+  // Mettre à jour les métadonnées / layout de la version active
+  const updateActiveVersion = useCallback((updates: Partial<CVVersion>) => {
+    if (activeVersion) {
+      updateVersion(activeVersion.id, updates);
+    }
+  }, [activeVersion, updateVersion]);
+
   // Mettre à jour le template de la version active
   const updateActiveVersionTemplate = useCallback((template: CVTemplate) => {
     if (activeVersion) {
@@ -127,6 +186,7 @@ export function useCVVersions() {
     deleteVersion,
     switchVersion,
     updateActiveVersionData,
+    updateActiveVersion,
     updateActiveVersionTemplate,
   };
 }
