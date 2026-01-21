@@ -66,20 +66,21 @@ function SortableRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-3 rounded-lg border bg-card px-3 py-2 shadow-sm",
-        isDragging && "opacity-80 ring-2 ring-primary/20",
+        "flex items-center gap-3 rounded-lg border bg-card px-3 py-3 shadow-sm", // Augmenté py-2 à py-3 pour plus d'espace tactile
+        "touch-manipulation select-none", // Ajouté pour améliorer l'expérience tactile
+        isDragging && "opacity-80 ring-2 ring-primary/20 shadow-lg scale-105", // Ajouté scale-105 pendant le drag
         className
       )}
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <button
           type="button"
-          className="p-1 -ml-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing"
+          className="p-2 -ml-1 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation" // Augmenté p-1 à p-2 pour zone tactile plus grande
           aria-label="Déplacer"
           {...attributes}
           {...listeners}
         >
-          <GripVertical className="h-4 w-4" />
+          <GripVertical className="h-5 w-5" /> {/* Augmenté h-4 w-4 à h-5 w-5 pour plus de visibilité */}
         </button>
         {leading}
         <div className="min-w-0 flex-1">
@@ -101,7 +102,12 @@ function OrganizerList({
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
+    useSensor(TouchSensor, { 
+      activationConstraint: { 
+        delay: 100, // Réduit de 150ms à 100ms pour plus de réactivité
+        tolerance: 8  // Augmenté de 5 à 8 pour éviter les déclenchements accidentels
+      } 
+    })
   );
 
   return (
