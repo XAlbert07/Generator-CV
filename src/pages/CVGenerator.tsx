@@ -12,6 +12,7 @@ import { EducationForm } from '@/components/cv/EducationForm';
 import { SkillsForm } from '@/components/cv/SkillsForm';
 import { TemplateSelector } from '@/components/cv/TemplateSelector';
 import { CVPreview } from '@/components/cv/CVPreview';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Eye, FileText, RotateCcw, Loader2 } from 'lucide-react';
@@ -299,6 +300,7 @@ export default function CVGenerator() {
             />
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"

@@ -11,6 +11,7 @@ import { FullScreenPreview } from '@/components/cv/mobile/FullScreenPreview';
 import { FloatingPreviewButton } from '@/components/cv/mobile/FloatingPreviewButton';
 import { ProgressBar } from '@/components/cv/mobile/ProgressBar';
 import { MobileVersionsPanel } from '@/components/cv/mobile/MobileVersionsPanel';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Download, RotateCcw, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -233,14 +234,17 @@ export function MobileLayout({
               {activeVersion.name}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="text-muted-foreground"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleReset}
+              className="text-muted-foreground"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
         
         {/* Progress Bar */}
