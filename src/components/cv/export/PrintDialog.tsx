@@ -9,47 +9,62 @@ type PrintDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cvData: CVData;
-  /**
-   * Element id to capture for printing.
-   */
   visualElementId: string;
   defaultFilename: string;
 };
 
-export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialogProps) {
+export function PrintDialog({ open, onOpenChange, visualElementId, defaultFilename }: PrintDialogProps) {
   const [isPrinting, setIsPrinting] = React.useState(false);
 
   const handlePrint = async () => {
     setIsPrinting(true);
     try {
-      // Get the CV element
       const cvElement = document.getElementById(visualElementId);
       if (!cvElement) {
         throw new Error(`Élément CV non trouvé: ${visualElementId}`);
       }
 
-      // Create a new window for printing
+      // Récupérer tout le HTML et les styles du CV
+      const cvHtml = cvElement.outerHTML;
+      
+      // Récupérer TOUS les styles de la page (y compris Tailwind)
+      const styles = Array.from(document.styleSheets)
+        .map(sheet => {
+          try {
+            return Array.from(sheet.cssRules)
+              .map(rule => rule.cssText)
+              .join('\n');
+          } catch (e) {
+            // Ignorer les feuilles de style externes (CORS)
+            return '';
+          }
+        })
+        .join('\n');
+
+      // Créer une nouvelle fenêtre pour l'impression
       const printWindow = window.open("", "_blank");
       if (!printWindow) {
         throw new Error("Impossible d'ouvrir la fenêtre d'impression");
       }
 
-      // Get the element's HTML
-      const cvHtml = cvElement.innerHTML;
-
-      // Create the print document with print-optimized styles
+      // Document optimisé pour l'impression avec tous les styles inline
       const printDoc = `<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV - Impression</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
+    <title>${defaultFilename || 'CV'}</title>
+    
+    <!-- Styles de la page principale (inclut Tailwind) -->
+    <style>
+        ${styles}
+    </style>
+    
+    <!-- Styles d'impression optimisés -->
     <style>
         @page {
             size: A4 portrait;
             margin: 0;
-            padding: 0;
         }
         
         html, body {
@@ -66,55 +81,31 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Ensure A4 format */
-        .cv-print-container {
+        /* Assurer le format A4 */
+        #cv-print-wrapper {
             width: 210mm !important;
-            height: 297mm !important;
+            min-height: 297mm !important;
             margin: 0 !important;
             padding: 0 !important;
             box-sizing: border-box;
             page-break-after: avoid;
-            display: flex;
-            flex-direction: column;
+            background: white !important;
         }
         
-        /* Preserve colors and layout exactly as shown */
+        /* Forcer les couleurs à l'impression */
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
         }
         
-        /* Hide elements that shouldn't print */
-        .no-print, 
-        .print-hide,
-        [class*="hide-print"] {
-            display: none !important;
-        }
+        /* Optimiser les polices */
+        h1 { font-size: 2rem !important; }
+        h2 { font-size: 1.2rem !important; }
+        h3 { font-size: 1rem !important; }
+        p, span, li { font-size: 13px !important; line-height: 1.6 !important; }
         
-        /* Optimize fonts for printing */
-        body {
-            font-size: 13px !important;
-        }
-        
-        h1 {
-            font-size: 2rem !important;
-        }
-        
-        h2 {
-            font-size: 1.2rem !important;
-        }
-        
-        h3 {
-            font-size: 1rem !important;
-        }
-        
-        p, span, li {
-            font-size: 13px !important;
-            line-height: 1.6 !important;
-        }
-        
-        /* Prevent page breaks inside sections */
+        /* Éviter les coupures de page */
         .section-divider,
         .skill-badge,
         [class*="experience"],
@@ -122,82 +113,71 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
             page-break-inside: avoid;
         }
         
-        /* Remove shadows and borders that don't print well */
-        [class*="shadow"] {
-            box-shadow: none !important;
-        }
-        
-        /* Ensure images scale properly */
+        /* Optimiser les images */
         img {
             max-width: 100%;
             height: auto;
+            page-break-inside: avoid;
         }
         
-        /* Optimize for printing - remove extra margins */
-        .shadow-xl {
-            box-shadow: none !important;
+        /* Masquer les ombres pour l'impression */
+        @media print {
+            [class*="shadow"] {
+                box-shadow: none !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="cv-print-container">
+    <div id="cv-print-wrapper">
         ${cvHtml}
     </div>
     
     <script>
         (function() {
-            // Wait for DOM to be fully loaded
-            function attemptPrint() {
-                // Check if Tailwind and images are loaded
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', attemptPrint);
-                    return;
-                }
-                
-                // Give extra time for external scripts and images to load
-                setTimeout(function() {
-                    // Trigger print dialog
-                    window.print();
-                    
-                    // Close window after print completes
-                    window.addEventListener('afterprint', function() {
-                        window.close();
-                    });
-                    
-                    // Fallback: Close after 5 seconds
-                    setTimeout(function() {
-                        try {
-                            window.close();
-                        } catch(e) {
-                            console.log('Window close prevented');
-                        }
-                    }, 5000);
-                }, 800);
+            // Attendre que tout soit chargé
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPrint);
+            } else {
+                initPrint();
             }
             
-            // Start the process
-            attemptPrint();
-            
-            // Also wait for all images to load
-            window.addEventListener('load', function() {
-                console.log('Page fully loaded');
-            });
+            function initPrint() {
+                // Attendre un peu pour que les images se chargent
+                setTimeout(function() {
+                    // Lancer l'impression
+                    window.print();
+                    
+                    // Fermer après impression
+                    window.addEventListener('afterprint', function() {
+                        setTimeout(function() {
+                            window.close();
+                        }, 100);
+                    });
+                    
+                    // Fallback: fermer après 5 secondes
+                    setTimeout(function() {
+                        try { window.close(); } catch(e) {}
+                    }, 5000);
+                }, 500);
+            }
         })();
     <\/script>
 </body>
 </html>`;
 
-      // Write the document
+      // Écrire le document
       printWindow.document.write(printDoc);
       printWindow.document.close();
 
-      // Fermer le dialog immédiatement (important pour mobile)
-      toast.success("Fenêtre d'impression ouverte. Utilisez les options de votre appareil pour sauvegarder en PDF.");
+      // Fermer le dialog et afficher un message
+      toast.success("Fenêtre d'impression ouverte. Sauvegardez en PDF depuis les options.");
       onOpenChange(false);
       setIsPrinting(false);
+      
     } catch (e: any) {
       console.error("Print error:", e);
-      toast.error(e?.message ? `Erreur: ${e.message}` : "Erreur lors de l'ouverture de l'impression");
+      toast.error(e?.message ? `Erreur: ${e.message}` : "Erreur lors de l'impression");
       setIsPrinting(false);
     }
   };
@@ -208,20 +188,27 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
         <DialogHeader>
           <DialogTitle>Imprimer le CV</DialogTitle>
           <DialogDescription>
-            Vous allez ouvrir une fenêtre d'impression optimisée pour sauvegarder votre CV en PDF avec la meilleure qualité.
+            Ouvrez la fenêtre d'impression pour sauvegarder votre CV en PDF haute qualité.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-800">
-              <strong>💡 Conseil :</strong> Une fenêtre d'impression s'ouvrira. Vous pourrez alors :
+          <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
+              <strong>💡 Instructions :</strong>
             </p>
-            <ul className="text-sm text-blue-700 mt-2 space-y-1 ml-4 list-disc">
-              <li>Vérifier l'aperçu avant d'imprimer</li>
-              <li>Cliquer sur "Enregistrer en tant que PDF" pour le sauvegarder</li>
-              <li>Ou imprimer sur papier physique</li>
+            <ul className="text-sm text-blue-700 dark:text-blue-300 mt-2 space-y-1 ml-4 list-disc">
+              <li>Une fenêtre d'impression va s'ouvrir</li>
+              <li>Vérifiez l'aperçu de votre CV</li>
+              <li>Choisissez "Enregistrer au format PDF"</li>
+              <li>Cliquez sur "Enregistrer"</li>
             </ul>
+          </div>
+
+          <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              <strong>📱 Sur mobile :</strong> Le CV s'affichera dans le menu d'impression natif de votre appareil.
+            </p>
           </div>
         </div>
 
