@@ -45,117 +45,196 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
     }
   };
 
-  // Méthode d'impression pour mobile - utilise l'impression directe de la page actuelle
+  // Méthode d'impression pour mobile - utilise un iframe caché avec un document HTML complet
   const handleMobilePrint = async () => {
     const cvElement = document.getElementById(visualElementId);
     if (!cvElement) {
       throw new Error(`Élément CV non trouvé: ${visualElementId}`);
     }
 
-    // On crée un style temporaire qui masque tout sauf le CV lors de l'impression
-    const printStyle = document.createElement('style');
-    printStyle.id = 'mobile-print-styles';
-    printStyle.textContent = `
-      @media print {
-        /* Masquer tout le corps de la page */
-        body > *:not(#print-only-wrapper) {
-          display: none !important;
-        }
-        
-        /* Configuration de la page A4 */
+    // On récupère le HTML du CV exactement comme sur desktop
+    const cvHtml = cvElement.innerHTML;
+
+    // On crée le même document HTML complet que sur desktop, mais dans un iframe
+    const printDoc = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Impression</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <style>
         @page {
-          size: A4 portrait;
-          margin: 0;
+            size: A4 portrait;
+            margin: 0;
+            padding: 0;
         }
         
         html, body {
-          width: 210mm;
-          height: 297mm;
-          margin: 0 !important;
-          padding: 0 !important;
-          background: white !important;
+            width: 210mm;
+            height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
         }
         
-        /* Le wrapper d'impression devient visible */
-        #print-only-wrapper {
-          display: block !important;
-          width: 210mm !important;
-          height: 297mm !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          box-sizing: border-box;
-        }
-        
-        /* Préserver les couleurs exactement */
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-        
-        /* Éviter les coupures de page à l'intérieur des sections */
-        .section-divider,
-        .skill-badge,
-        [class*="experience"],
-        [class*="education"] {
-          page-break-inside: avoid;
-        }
-        
-        /* Supprimer les ombres qui ne s'impriment pas bien */
-        [class*="shadow"] {
-          box-shadow: none !important;
-        }
-        
-        /* Optimiser la taille des polices pour l'impression */
         body {
-          font-size: 13px !important;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
+        .cv-print-container {
+            width: 210mm !important;
+            height: 297mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
+            page-break-after: avoid;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        
+        .no-print, 
+        .print-hide,
+        [class*="hide-print"] {
+            display: none !important;
+        }
+        
+        body { font-size: 13px !important; }
         h1 { font-size: 2rem !important; }
         h2 { font-size: 1.2rem !important; }
         h3 { font-size: 1rem !important; }
         p, span, li { font-size: 13px !important; line-height: 1.6 !important; }
-      }
-    `;
+        
+        .section-divider,
+        .skill-badge,
+        [class*="experience"],
+        [class*="education"] {
+            page-break-inside: avoid;
+        }
+        
+        [class*="shadow"] {
+            box-shadow: none !important;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-print-container">
+        ${cvHtml}
+    </div>
+</body>
+</html>`;
+
+    // Créer un iframe complètement invisible dans la page actuelle
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.top = '-9999px';
+    iframe.style.left = '-9999px';
+    iframe.style.width = '210mm';
+    iframe.style.height = '297mm';
+    iframe.style.border = 'none';
+    iframe.style.visibility = 'hidden';
     
-    document.head.appendChild(printStyle);
+    document.body.appendChild(iframe);
 
-    // Créer un conteneur temporaire qui sera visible uniquement lors de l'impression
-    const printWrapper = document.createElement('div');
-    printWrapper.id = 'print-only-wrapper';
-    printWrapper.style.display = 'none'; // Masqué par défaut, visible seulement en @media print
+    // Écrire le document HTML complet dans l'iframe
+    const iframeDoc = iframe.contentWindow?.document;
+    if (!iframeDoc) {
+      iframe.remove();
+      throw new Error("Impossible d'accéder au document de l'iframe");
+    }
+
+    iframeDoc.open();
+    iframeDoc.write(printDoc);
+    iframeDoc.close();
+
+    // Maintenant vient la partie critique : attendre que TOUT soit chargé
+    // On va utiliser plusieurs mécanismes de sécurité pour être absolument certain
+    // que Tailwind CSS est complètement chargé avant de lancer l'impression
     
-    // Cloner le CV pour l'ajouter au wrapper d'impression
-    const cvClone = cvElement.cloneNode(true) as HTMLElement;
-    printWrapper.appendChild(cvClone);
-    document.body.appendChild(printWrapper);
-
-    // Attendre un court instant pour que le navigateur applique les styles
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Déclencher l'impression native
-    window.print();
-
-    // Nettoyer après l'impression (on attend que l'utilisateur ferme le dialogue d'impression)
-    const cleanupPrint = () => {
-      // Supprimer le wrapper temporaire et les styles
-      printWrapper?.remove();
-      printStyle?.remove();
+    return new Promise<void>((resolve, reject) => {
+      let printExecuted = false;
+      let loadTimeout: number;
       
-      // Retirer l'écouteur
-      window.removeEventListener('afterprint', cleanupPrint);
-    };
-    
-    // Nettoyer après que l'utilisateur ait terminé avec le dialogue d'impression
-    window.addEventListener('afterprint', cleanupPrint);
-    
-    // Fallback de nettoyage après 10 secondes au cas où 'afterprint' ne se déclenche pas
-    setTimeout(cleanupPrint, 10000);
-
-    toast.success("Impression lancée. Utilisez 'Enregistrer en PDF' dans les options.");
+      // Fonction qui lance réellement l'impression, une seule fois
+      const executePrint = () => {
+        if (printExecuted) return;
+        printExecuted = true;
+        
+        // Nettoyer le timeout si on arrive ici avant
+        if (loadTimeout) clearTimeout(loadTimeout);
+        
+        try {
+          // Sur certains navigateurs mobiles, on doit utiliser la méthode print du contentWindow
+          const printWindow = iframe.contentWindow;
+          if (!printWindow) {
+            throw new Error("Impossible d'accéder à la fenêtre de l'iframe");
+          }
+          
+          // Lancer l'impression depuis l'iframe
+          printWindow.focus();
+          printWindow.print();
+          
+          toast.success("Impression lancée. Utilisez 'Enregistrer en PDF' dans les options.");
+          
+          // Nettoyer l'iframe après l'impression ou après un délai
+          const cleanup = () => {
+            iframe.remove();
+            resolve();
+          };
+          
+          // Écouter la fin de l'impression si le navigateur le supporte
+          if ('onafterprint' in printWindow) {
+            printWindow.addEventListener('afterprint', cleanup);
+          }
+          
+          // Fallback : nettoyer après 10 secondes de toute façon
+          setTimeout(cleanup, 10000);
+          
+        } catch (error) {
+          iframe.remove();
+          reject(error);
+        }
+      };
+      
+      // Premier niveau de détection : l'événement load de l'iframe
+      // Cet événement se déclenche quand TOUTES les ressources sont chargées
+      iframe.addEventListener('load', () => {
+        console.log('Iframe loaded - ressources externes chargées');
+        
+        // Même après le load, on attend encore un peu pour être sûr
+        // que le navigateur a fini de calculer tous les layouts et d'appliquer
+        // tous les styles CSS. Sur mobile, ce calcul peut prendre plus de temps.
+        setTimeout(() => {
+          console.log('Délai de sécurité écoulé - lancement de l\'impression');
+          executePrint();
+        }, 1000); // 1 seconde de marge de sécurité après le load
+      });
+      
+      // Deuxième niveau de sécurité : un timeout maximum
+      // Si après 15 secondes rien ne s'est passé (connexion très lente ou CDN inaccessible),
+      // on lance l'impression quand même pour ne pas bloquer l'utilisateur indéfiniment
+      loadTimeout = window.setTimeout(() => {
+        console.warn('Timeout atteint - lancement forcé de l\'impression');
+        executePrint();
+      }, 15000);
+    });
   };
 
   // Méthode d'impression pour ordinateur - ouvre une nouvelle fenêtre
+  // CETTE PARTIE N'EST PAS MODIFIÉE
   const handleDesktopPrint = async () => {
     const cvElement = document.getElementById(visualElementId);
     if (!cvElement) {
