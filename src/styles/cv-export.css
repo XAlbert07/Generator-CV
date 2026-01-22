@@ -1,0 +1,92 @@
+/* ==========================================
+   CV EXPORT STYLES - Pour PDF et impression
+   Styles universels qui fonctionnent avec tout
+   ========================================== */
+
+/* Classe appliquée lors de l'export PDF */
+.cv-export-mode {
+  background: white !important;
+  color: black !important;
+}
+
+.cv-export-mode * {
+  background: white !important;
+  color: black !important;
+}
+
+.cv-export-mode [class*="bg-"] {
+  background: white !important;
+}
+
+.cv-export-mode [class*="text-"] {
+  color: black !important;
+}
+
+/* Styles d'impression (pour Ctrl+P et PDF export) */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  /* Tous les templates - forcer les couleurs */
+  [id*="template-root"] {
+    background: white !important;
+    color: black !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  [id*="template-root"] * {
+    color: black !important;
+    background: transparent !important;
+    background-color: white !important;
+    background-image: none !important;
+  }
+
+  /* Forcer les en-têtes en noir */
+  [id*="template-root"] h1,
+  [id*="template-root"] h2,
+  [id*="template-root"] h3,
+  [id*="template-root"] h4,
+  [id*="template-root"] h5,
+  [id*="template-root"] h6 {
+    color: black !important;
+  }
+
+  /* Surcharger Tailwind colors */
+  [id*="template-root"] [class*="bg-blue"],
+  [id*="template-root"] [class*="bg-slate"],
+  [id*="template-root"] [class*="bg-indigo"],
+  [id*="template-root"] [class*="bg-purple"],
+  [id*="template-root"] [class*="bg-gray"],
+  [id*="template-root"] [class*="bg-gradient"] {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  [id*="template-root"] [class*="text-white"],
+  [id*="template-root"] [class*="text-blue"],
+  [id*="template-root"] [class*="text-slate"],
+  [id*="template-root"] [class*="text-indigo"],
+  [id*="template-root"] [class*="text-purple"],
+  [id*="template-root"] [class*="text-gray"] {
+    color: black !important;
+  }
+
+  /* Imprimer couleur exacte */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}

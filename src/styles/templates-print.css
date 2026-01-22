@@ -1,0 +1,487 @@
+/* ===========================================
+   CV TEMPLATES - PRINT STYLES
+   Styles d'impression unifiés pour tous les templates
+   =========================================== */
+
+@media print {
+  /* Configuration de base pour tous les templates */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* ===========================================
+     COULEURS D'IMPRESSION - FORÇAGE GLOBAL
+     =========================================== */
+
+  /* Fond blanc pour tous les éléments */
+  * {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  /* Texte noir pour tous les éléments */
+  * {
+    color: black !important;
+  }
+
+  /* Forcer spécifiquement les classes Tailwind */
+  [class*="bg-gradient"],
+  [class*="from-"],
+  [class*="via-"],
+  [class*="to-"],
+  [class*="bg-blue"],
+  [class*="bg-slate"],
+  [class*="bg-indigo"],
+  [class*="bg-purple"],
+  [class*="bg-navy"],
+  [class*="bg-gray"],
+  [class*="bg-white"] {
+    background: white !important;
+    background-image: none !important;
+  }
+
+  [class*="text-white"],
+  [class*="text-blue"],
+  [class*="text-slate"],
+  [class*="text-indigo"],
+  [class*="text-purple"],
+  [class*="text-navy"],
+  [class*="text-gray"] {
+    color: black !important;
+  }
+
+  /* ===========================================
+     STYLES SPÉCIFIQUES PAR TEMPLATE
+     =========================================== */
+
+  /* Modern Template */
+  #modern-template-root {
+    font-size: 11pt !important;
+  }
+
+  #modern-template-root .header-section {
+    padding: 1.5rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+  }
+
+  #modern-template-root .content-section {
+    padding: 1.5rem !important;
+  }
+
+  #modern-template-root h1 {
+    font-size: 1.875rem !important;
+  }
+
+  #modern-template-root h2 {
+    font-size: 1rem !important;
+  }
+
+  #modern-template-root h3 {
+    font-size: 0.95rem !important;
+  }
+
+  #modern-template-root p,
+  #modern-template-root span,
+  #modern-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #modern-template-root .photo-container {
+    width: 5.5rem !important;
+    height: 5.5rem !important;
+  }
+
+  #modern-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Professional Template */
+  #professional-template-root {
+    font-size: 11pt !important;
+  }
+
+  #professional-template-root .header-section {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+  }
+
+  #professional-template-root .sidebar-section {
+    width: 48mm !important;
+    padding: 1rem !important;
+    background: #f8f9fa !important;
+    border-right: 1px solid #e9ecef !important;
+  }
+
+  #professional-template-root .main-content-section {
+    padding: 1.25rem !important;
+  }
+
+  #professional-template-root h1 {
+    font-size: 1.75rem !important;
+  }
+
+  #professional-template-root h2 {
+    font-size: 0.875rem !important;
+  }
+
+  #professional-template-root h3 {
+    font-size: 0.875rem !important;
+  }
+
+  #professional-template-root p,
+  #professional-template-root span,
+  #professional-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #professional-template-root .photo-container {
+    width: 5.5rem !important;
+    height: 5.5rem !important;
+  }
+
+  #professional-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Creative Template */
+  #creative-template-root {
+    font-size: 11pt !important;
+  }
+
+  #creative-template-root .sidebar-section {
+    width: 75mm !important;
+    padding: 1.5rem !important;
+    background: #f8f9fa !important;
+    border-right: 1px solid #e9ecef !important;
+  }
+
+  #creative-template-root .main-section {
+    padding: 1.5rem !important;
+  }
+
+  #creative-template-root .header-section {
+    padding: 1.5rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+  }
+
+  #creative-template-root h1 {
+    font-size: 1.875rem !important;
+  }
+
+  #creative-template-root h2 {
+    font-size: 1.125rem !important;
+  }
+
+  #creative-template-root h3 {
+    font-size: 1rem !important;
+  }
+
+  #creative-template-root p,
+  #creative-template-root span,
+  #creative-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #creative-template-root .photo-container {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+
+  #creative-template-root .photo-badge {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+
+  #creative-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Executive Template */
+  #executive-template-root {
+    font-size: 11pt !important;
+  }
+
+  #executive-template-root .header-section {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+  }
+
+  #executive-template-root h1 {
+    font-size: 1.875rem !important;
+  }
+
+  #executive-template-root h2 {
+    font-size: 1rem !important;
+  }
+
+  #executive-template-root h3 {
+    font-size: 0.95rem !important;
+  }
+
+  #executive-template-root p,
+  #executive-template-root span,
+  #executive-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #executive-template-root .photo-container {
+    width: 6rem !important;
+    height: 6rem !important;
+  }
+
+  #executive-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Minimalist Template */
+  #minimalist-template-root {
+    font-size: 11pt !important;
+  }
+
+  #minimalist-template-root .header-section {
+    padding: 2rem !important;
+    background: white !important;
+    border-bottom: 1px solid #e9ecef !important;
+  }
+
+  #minimalist-template-root h1 {
+    font-size: 1.75rem !important;
+  }
+
+  #minimalist-template-root h2 {
+    font-size: 0.875rem !important;
+  }
+
+  #minimalist-template-root h3 {
+    font-size: 0.95rem !important;
+  }
+
+  #minimalist-template-root p,
+  #minimalist-template-root span,
+  #minimalist-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  #minimalist-template-root .photo-container {
+    width: 5.5rem !important;
+    height: 5.5rem !important;
+  }
+
+  #minimalist-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  #minimalist-template-root .date-column {
+    width: 6rem !important;
+  }
+
+  /* Elegant Template */
+  #elegant-template-root {
+    font-size: 11pt !important;
+  }
+
+  #elegant-template-root .header-section {
+    padding: 2rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+  }
+
+  #elegant-template-root h1 {
+    font-size: 1.875rem !important;
+  }
+
+  #elegant-template-root h2 {
+    font-size: 1.125rem !important;
+  }
+
+  #elegant-template-root h3 {
+    font-size: 1rem !important;
+  }
+
+  #elegant-template-root p,
+  #elegant-template-root span,
+  #elegant-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #elegant-template-root .photo-container {
+    width: 7rem !important;
+    height: 7rem !important;
+  }
+
+  #elegant-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Corporate Template */
+  #corporate-template-root {
+    font-size: 11pt !important;
+  }
+
+  #corporate-template-root .header-section {
+    padding: 2rem !important;
+    background: #f8f9fa !important;
+    border-bottom: 2px solid #e9ecef !important;
+  }
+
+  #corporate-template-root h1 {
+    font-size: 1.75rem !important;
+  }
+
+  #corporate-template-root h2 {
+    font-size: 0.875rem !important;
+  }
+
+  #corporate-template-root h3 {
+    font-size: 0.95rem !important;
+  }
+
+  #corporate-template-root p,
+  #corporate-template-root span,
+  #corporate-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #corporate-template-root .photo-container {
+    width: 5.5rem !important;
+    height: 5.5rem !important;
+  }
+
+  #corporate-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  /* Classic Template */
+  #classic-template-root {
+    font-size: 11pt !important;
+  }
+
+  #classic-template-root .header-section {
+    padding: 2rem !important;
+    background: white !important;
+    border-bottom: 2px solid #333 !important;
+  }
+
+  #classic-template-root h1 {
+    font-size: 1.75rem !important;
+  }
+
+  #classic-template-root h2 {
+    font-size: 0.875rem !important;
+  }
+
+  #classic-template-root h3 {
+    font-size: 0.95rem !important;
+  }
+
+  #classic-template-root p,
+  #classic-template-root span,
+  #classic-template-root li,
+  #classic-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  #classic-template-root .photo-container {
+    width: 5rem !important;
+    height: 5rem !important;
+  }
+
+  #classic-template-root .contact-icon {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+
+  #classic-template-root .border-gray-300 {
+    border-color: #ccc !important;
+  }
+
+  /* ATS Template */
+  #ats-template-root {
+    font-size: 11pt !important;
+  }
+
+  #ats-template-root .header-section {
+    padding: 2rem !important;
+  }
+
+  #ats-template-root h1 {
+    font-size: 1.875rem !important;
+  }
+
+  #ats-template-root h2 {
+    font-size: 1.125rem !important;
+  }
+
+  #ats-template-root p,
+  #ats-template-root div {
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+  }
+
+  /* ===========================================
+     RÈGLES GÉNÉRALES POUR TOUS LES TEMPLATES
+     =========================================== */
+
+  /* Tous les templates */
+  [id$="-template-root"] {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+  }
+
+  [id$="-template-root"] * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+  }
+
+  /* Photos et images */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Liens */
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+
+  /* Bordures et séparateurs */
+  hr, .border, [class*="border"] {
+    border-color: #ccc !important;
+  }
+}

@@ -2,7 +2,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import type { CVData } from "@/types/cv";
 
-export type ExportFormat = "pdf_visual" | "pdf_ats" | "docx";
+export type ExportFormat = "pdf_ats" | "docx";
 
 export type ExportOptions = {
   format: ExportFormat;
@@ -10,7 +10,7 @@ export type ExportOptions = {
   marginMm: number;
   fontFamily: "sans" | "serif" | "mono";
   fontSizePt: number;
-  rasterScale: number; // for visual PDF
+  rasterScale: number; // for visual PDF (deprecated, kept for backward compatibility)
 };
 
 function withExtension(name: string, ext: "pdf" | "docx") {
@@ -23,56 +23,6 @@ function pdfFontFromChoice(choice: ExportOptions["fontFamily"]): "helvetica" | "
   if (choice === "serif") return "times";
   if (choice === "mono") return "courier";
   return "helvetica";
-}
-
-export async function exportVisualPdfFromElementId(elementId: string, opts: ExportOptions) {
-  const element = document.getElementById(elementId);
-  if (!element) throw new Error(`Element not found: ${elementId}`);
-
-  const originalTransform = element.style.transform;
-  const originalTransformOrigin = element.style.transformOrigin;
-
-  try {
-    // Force 1:1 for capture (desktop preview is scaled via CSS var)
-    element.style.transform = "scale(1)";
-    element.style.transformOrigin = "top left";
-
-    const canvas = await html2canvas(element, {
-      scale: opts.rasterScale,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    });
-
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const margin = Math.max(0, Number.isFinite(opts.marginMm) ? opts.marginMm : 0);
-
-    const maxW = pdfWidth - margin * 2;
-    const maxH = pdfHeight - margin * 2;
-
-    const imgW = canvas.width;
-    const imgH = canvas.height;
-    const imgRatio = imgW / imgH;
-
-    let drawW = maxW;
-    let drawH = drawW / imgRatio;
-    if (drawH > maxH) {
-      drawH = maxH;
-      drawW = drawH * imgRatio;
-    }
-
-    const x = margin + (maxW - drawW) / 2;
-    const y = margin + (maxH - drawH) / 2;
-
-    pdf.addImage(imgData, "PNG", x, y, drawW, drawH);
-    pdf.save(withExtension(opts.filename, "pdf"));
-  } finally {
-    element.style.transform = originalTransform;
-    element.style.transformOrigin = originalTransformOrigin;
-  }
 }
 
 type PdfCursor = {
