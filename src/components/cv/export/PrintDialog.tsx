@@ -19,44 +19,26 @@ type PrintDialogProps = {
 export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialogProps) {
   const [isPrinting, setIsPrinting] = React.useState(false);
 
-  // Détection si l'utilisateur est sur mobile
-  const isMobileDevice = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
-
   const handlePrint = async () => {
     setIsPrinting(true);
-    
     try {
-      // Sur mobile, on utilise une approche différente plus fiable
-      if (isMobileDevice()) {
-        await handleMobilePrint();
-      } else {
-        await handleDesktopPrint();
+      // Get the CV element
+      const cvElement = document.getElementById(visualElementId);
+      if (!cvElement) {
+        throw new Error(`Élément CV non trouvé: ${visualElementId}`);
       }
-      
-      // Fermer le dialogue après avoir lancé l'impression
-      onOpenChange(false);
-      setIsPrinting(false);
-    } catch (e: any) {
-      console.error("Print error:", e);
-      toast.error(e?.message ? `Erreur: ${e.message}` : "Erreur lors de l'ouverture de l'impression");
-      setIsPrinting(false);
-    }
-  };
 
-  // Méthode d'impression pour mobile - utilise un iframe caché avec un document HTML complet
-  const handleMobilePrint = async () => {
-    const cvElement = document.getElementById(visualElementId);
-    if (!cvElement) {
-      throw new Error(`Élément CV non trouvé: ${visualElementId}`);
-    }
+      // Create a new window for printing
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        throw new Error("Impossible d'ouvrir la fenêtre d'impression");
+      }
 
-    // On récupère le HTML du CV exactement comme sur desktop
-    const cvHtml = cvElement.innerHTML;
+      // Get the element's HTML
+      const cvHtml = cvElement.innerHTML;
 
-    // On crée le même document HTML complet que sur desktop, mais dans un iframe
-    const printDoc = `<!DOCTYPE html>
+      // Create the print document with print-optimized styles
+      const printDoc = `<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -84,6 +66,7 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
             -moz-osx-font-smoothing: grayscale;
         }
         
+        /* Ensure A4 format */
         .cv-print-container {
             width: 210mm !important;
             height: 297mm !important;
@@ -95,216 +78,43 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
             flex-direction: column;
         }
         
+        /* Preserve colors and layout exactly as shown */
         * {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
         }
         
+        /* Hide elements that shouldn't print */
         .no-print, 
         .print-hide,
         [class*="hide-print"] {
             display: none !important;
         }
         
-        body { font-size: 13px !important; }
-        h1 { font-size: 2rem !important; }
-        h2 { font-size: 1.2rem !important; }
-        h3 { font-size: 1rem !important; }
-        p, span, li { font-size: 13px !important; line-height: 1.6 !important; }
-        
-        .section-divider,
-        .skill-badge,
-        [class*="experience"],
-        [class*="education"] {
-            page-break-inside: avoid;
-        }
-        
-        [class*="shadow"] {
-            box-shadow: none !important;
-        }
-        
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-    </style>
-</head>
-<body>
-    <div class="cv-print-container">
-        ${cvHtml}
-    </div>
-</body>
-</html>`;
-
-    // Créer un iframe complètement invisible dans la page actuelle
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.top = '-9999px';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '210mm';
-    iframe.style.height = '297mm';
-    iframe.style.border = 'none';
-    iframe.style.visibility = 'hidden';
-    
-    document.body.appendChild(iframe);
-
-    // Écrire le document HTML complet dans l'iframe
-    const iframeDoc = iframe.contentWindow?.document;
-    if (!iframeDoc) {
-      iframe.remove();
-      throw new Error("Impossible d'accéder au document de l'iframe");
-    }
-
-    iframeDoc.open();
-    iframeDoc.write(printDoc);
-    iframeDoc.close();
-
-    // Maintenant vient la partie critique : attendre que TOUT soit chargé
-    // On va utiliser plusieurs mécanismes de sécurité pour être absolument certain
-    // que Tailwind CSS est complètement chargé avant de lancer l'impression
-    
-    return new Promise<void>((resolve, reject) => {
-      let printExecuted = false;
-      let loadTimeout: number;
-      
-      // Fonction qui lance réellement l'impression, une seule fois
-      const executePrint = () => {
-        if (printExecuted) return;
-        printExecuted = true;
-        
-        // Nettoyer le timeout si on arrive ici avant
-        if (loadTimeout) clearTimeout(loadTimeout);
-        
-        try {
-          // Sur certains navigateurs mobiles, on doit utiliser la méthode print du contentWindow
-          const printWindow = iframe.contentWindow;
-          if (!printWindow) {
-            throw new Error("Impossible d'accéder à la fenêtre de l'iframe");
-          }
-          
-          // Lancer l'impression depuis l'iframe
-          printWindow.focus();
-          printWindow.print();
-          
-          toast.success("Impression lancée. Utilisez 'Enregistrer en PDF' dans les options.");
-          
-          // Nettoyer l'iframe après l'impression ou après un délai
-          const cleanup = () => {
-            iframe.remove();
-            resolve();
-          };
-          
-          // Écouter la fin de l'impression si le navigateur le supporte
-          if ('onafterprint' in printWindow) {
-            printWindow.addEventListener('afterprint', cleanup);
-          }
-          
-          // Fallback : nettoyer après 10 secondes de toute façon
-          setTimeout(cleanup, 10000);
-          
-        } catch (error) {
-          iframe.remove();
-          reject(error);
-        }
-      };
-      
-      // Premier niveau de détection : l'événement load de l'iframe
-      // Cet événement se déclenche quand TOUTES les ressources sont chargées
-      iframe.addEventListener('load', () => {
-        console.log('Iframe loaded - ressources externes chargées');
-        
-        // Même après le load, on attend encore un peu pour être sûr
-        // que le navigateur a fini de calculer tous les layouts et d'appliquer
-        // tous les styles CSS. Sur mobile, ce calcul peut prendre plus de temps.
-        setTimeout(() => {
-          console.log('Délai de sécurité écoulé - lancement de l\'impression');
-          executePrint();
-        }, 1000); // 1 seconde de marge de sécurité après le load
-      });
-      
-      // Deuxième niveau de sécurité : un timeout maximum
-      // Si après 15 secondes rien ne s'est passé (connexion très lente ou CDN inaccessible),
-      // on lance l'impression quand même pour ne pas bloquer l'utilisateur indéfiniment
-      loadTimeout = window.setTimeout(() => {
-        console.warn('Timeout atteint - lancement forcé de l\'impression');
-        executePrint();
-      }, 15000);
-    });
-  };
-
-  // Méthode d'impression pour ordinateur - ouvre une nouvelle fenêtre
-  // CETTE PARTIE N'EST PAS MODIFIÉE
-  const handleDesktopPrint = async () => {
-    const cvElement = document.getElementById(visualElementId);
-    if (!cvElement) {
-      throw new Error(`Élément CV non trouvé: ${visualElementId}`);
-    }
-
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      throw new Error("Impossible d'ouvrir la fenêtre d'impression");
-    }
-
-    const cvHtml = cvElement.innerHTML;
-
-    const printDoc = `<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV - Impression</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
-    <style>
-        @page {
-            size: A4 portrait;
-            margin: 0;
-            padding: 0;
-        }
-        
-        html, body {
-            width: 210mm;
-            height: 297mm;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-        }
-        
+        /* Optimize fonts for printing */
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-size: 13px !important;
         }
         
-        .cv-print-container {
-            width: 210mm !important;
-            height: 297mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-sizing: border-box;
-            page-break-after: avoid;
-            display: flex;
-            flex-direction: column;
+        h1 {
+            font-size: 2rem !important;
         }
         
-        * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
+        h2 {
+            font-size: 1.2rem !important;
         }
         
-        .no-print, 
-        .print-hide,
-        [class*="hide-print"] {
-            display: none !important;
+        h3 {
+            font-size: 1rem !important;
         }
         
-        body { font-size: 13px !important; }
-        h1 { font-size: 2rem !important; }
-        h2 { font-size: 1.2rem !important; }
-        h3 { font-size: 1rem !important; }
-        p, span, li { font-size: 13px !important; line-height: 1.6 !important; }
+        p, span, li {
+            font-size: 13px !important;
+            line-height: 1.6 !important;
+        }
         
+        /* Prevent page breaks inside sections */
         .section-divider,
         .skill-badge,
         [class*="experience"],
@@ -312,13 +122,20 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
             page-break-inside: avoid;
         }
         
+        /* Remove shadows and borders that don't print well */
         [class*="shadow"] {
             box-shadow: none !important;
         }
         
+        /* Ensure images scale properly */
         img {
             max-width: 100%;
             height: auto;
+        }
+        
+        /* Optimize for printing - remove extra margins */
+        .shadow-xl {
+            box-shadow: none !important;
         }
     </style>
 </head>
@@ -329,19 +146,25 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
     
     <script>
         (function() {
+            // Wait for DOM to be fully loaded
             function attemptPrint() {
+                // Check if Tailwind and images are loaded
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', attemptPrint);
                     return;
                 }
                 
+                // Give extra time for external scripts and images to load
                 setTimeout(function() {
+                    // Trigger print dialog
                     window.print();
                     
+                    // Close window after print completes
                     window.addEventListener('afterprint', function() {
                         window.close();
                     });
                     
+                    // Fallback: Close after 5 seconds
                     setTimeout(function() {
                         try {
                             window.close();
@@ -352,8 +175,10 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
                 }, 800);
             }
             
+            // Start the process
             attemptPrint();
             
+            // Also wait for all images to load
             window.addEventListener('load', function() {
                 console.log('Page fully loaded');
             });
@@ -362,10 +187,19 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
 </body>
 </html>`;
 
-    printWindow.document.write(printDoc);
-    printWindow.document.close();
+      // Write the document
+      printWindow.document.write(printDoc);
+      printWindow.document.close();
 
-    toast.success("Fenêtre d'impression ouverte. Utilisez les options de votre appareil pour sauvegarder en PDF.");
+      // Fermer le dialog immédiatement (important pour mobile)
+      toast.success("Fenêtre d'impression ouverte. Utilisez les options de votre appareil pour sauvegarder en PDF.");
+      onOpenChange(false);
+      setIsPrinting(false);
+    } catch (e: any) {
+      console.error("Print error:", e);
+      toast.error(e?.message ? `Erreur: ${e.message}` : "Erreur lors de l'ouverture de l'impression");
+      setIsPrinting(false);
+    }
   };
 
   return (
