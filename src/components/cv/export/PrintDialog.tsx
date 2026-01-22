@@ -44,7 +44,7 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV - Impression</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"><\/script>
     <style>
         @page {
             size: A4 portrait;
@@ -145,15 +145,45 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
     </div>
     
     <script>
-        // Auto-focus and print when document is ready
-        setTimeout(() => {
-            window.print();
-            // Close the window after printing
-            setTimeout(() => {
-                window.close();
-            }, 500);
-        }, 500);
-    </script>
+        (function() {
+            // Wait for DOM to be fully loaded
+            function attemptPrint() {
+                // Check if Tailwind and images are loaded
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', attemptPrint);
+                    return;
+                }
+                
+                // Give extra time for external scripts and images to load
+                setTimeout(function() {
+                    // Trigger print dialog
+                    window.print();
+                    
+                    // Close window after print completes
+                    window.addEventListener('afterprint', function() {
+                        window.close();
+                    });
+                    
+                    // Fallback: Close after 5 seconds
+                    setTimeout(function() {
+                        try {
+                            window.close();
+                        } catch(e) {
+                            console.log('Window close prevented');
+                        }
+                    }, 5000);
+                }, 800);
+            }
+            
+            // Start the process
+            attemptPrint();
+            
+            // Also wait for all images to load
+            window.addEventListener('load', function() {
+                console.log('Page fully loaded');
+            });
+        })();
+    <\/script>
 </body>
 </html>`;
 
@@ -161,12 +191,13 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
       printWindow.document.write(printDoc);
       printWindow.document.close();
 
-      toast.success("Fenêtre d'impression ouverte. Utilisez Ctrl+P ou la fonction Imprimer pour sauvegarder en PDF.");
+      // Fermer le dialog immédiatement (important pour mobile)
+      toast.success("Fenêtre d'impression ouverte. Utilisez les options de votre appareil pour sauvegarder en PDF.");
       onOpenChange(false);
+      setIsPrinting(false);
     } catch (e: any) {
       console.error("Print error:", e);
       toast.error(e?.message ? `Erreur: ${e.message}` : "Erreur lors de l'ouverture de l'impression");
-    } finally {
       setIsPrinting(false);
     }
   };
