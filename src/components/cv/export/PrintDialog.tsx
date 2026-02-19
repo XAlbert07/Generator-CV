@@ -1,5 +1,4 @@
 import * as React from "react";
-import type { CVData } from "@/types/cv";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -8,12 +7,10 @@ import { Printer } from "lucide-react";
 type PrintDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  cvData: CVData;
   /**
    * Element id to capture for printing.
    */
   visualElementId: string;
-  defaultFilename: string;
 };
 
 export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialogProps) {
@@ -35,7 +32,7 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
     return cvElement.innerHTML;
   };
 
-  const handlePrint = async () => {
+  const handlePrint = () => {
     setIsPrinting(true);
     try {
       // Get the CV element
@@ -168,7 +165,7 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
                 window.print();
             }
         })();
-    <\/script>
+    </script>
 </body>
 </html>`
         : `<!DOCTYPE html>
@@ -177,7 +174,7 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV - Impression</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @page {
             size: A4 portrait;
@@ -316,7 +313,7 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
                 console.log('Page fully loaded');
             });
         })();
-    <\/script>
+    </script>
 </body>
 </html>`;
 
@@ -327,10 +324,11 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
       // Fermer le dialog immédiatement (important pour mobile)
       toast.success("Fenêtre d'impression ouverte. Utilisez les options de votre appareil pour sauvegarder en PDF.");
       onOpenChange(false);
-      setIsPrinting(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Print error:", e);
-      toast.error(e?.message ? `Erreur: ${e.message}` : "Erreur lors de l'ouverture de l'impression");
+      const message = e instanceof Error ? e.message : "";
+      toast.error(message ? `Erreur: ${message}` : "Erreur lors de l'ouverture de l'impression");
+    } finally {
       setIsPrinting(false);
     }
   };

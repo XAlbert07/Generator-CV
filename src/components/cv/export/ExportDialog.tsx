@@ -79,9 +79,10 @@ export function ExportDialog({ open, onOpenChange, cvData, visualElementId, defa
       }
       toast.success("Export terminé");
       onOpenChange(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Export error:", e);
-      toast.error(e?.message ? `Erreur export: ${e.message}` : "Erreur lors de l'export");
+      const message = e instanceof Error ? e.message : "";
+      toast.error(message ? `Erreur export: ${message}` : "Erreur lors de l'export");
     } finally {
       setIsExporting(false);
     }
@@ -193,9 +194,7 @@ export function ExportDialog({ open, onOpenChange, cvData, visualElementId, defa
             onOpenChange(false);
           }
         }}
-        cvData={cvData}
         visualElementId={visualElementId}
-        defaultFilename={filename}
       />
     </>
   );
