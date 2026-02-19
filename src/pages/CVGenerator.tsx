@@ -16,6 +16,7 @@ import { ExportDialog } from '@/components/cv/export/ExportDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Eye, FileText, RotateCcw } from 'lucide-react';
+import { generateId } from '@/lib/id';
 
 import { toast } from 'sonner';
 
@@ -57,7 +58,7 @@ export default function CVGenerator() {
       experiences: [
         ...cvData.experiences,
         {
-          id: crypto.randomUUID(),
+          id: generateId(),
           company: '',
           position: '',
           startDate: '',
@@ -91,7 +92,7 @@ export default function CVGenerator() {
       education: [
         ...cvData.education,
         {
-          id: crypto.randomUUID(),
+          id: generateId(),
           school: '',
           degree: '',
           field: '',
@@ -124,7 +125,7 @@ export default function CVGenerator() {
       ...cvData,
       skills: [
         ...cvData.skills,
-        { id: crypto.randomUUID(), name: '', level: 3 },
+        { id: generateId(), name: '', level: 3 },
       ],
     });
   };
@@ -150,7 +151,7 @@ export default function CVGenerator() {
       ...cvData,
       languages: [
         ...cvData.languages,
-        { id: crypto.randomUUID(), name: '', level: 'Intermédiaire' },
+        { id: generateId(), name: '', level: 'Intermédiaire' },
       ],
     });
   };

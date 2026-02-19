@@ -7,6 +7,7 @@ import {
   defaultCVData,
   defaultSectionOrder,
 } from '@/types/cv';
+import { generateId } from '@/lib/id';
 
 const VERSIONS_KEY = 'cv-versions';
 const ACTIVE_VERSION_KEY = 'cv-active-version-id';
@@ -19,7 +20,7 @@ export function useCVVersions() {
       .map((v: any): CVVersion | null => {
         if (!v || typeof v !== 'object') return null;
 
-        const id = typeof v.id === 'string' ? v.id : crypto.randomUUID();
+        const id = typeof v.id === 'string' ? v.id : generateId();
         const name = typeof v.name === 'string' ? v.name : 'Mon CV';
         const template = (typeof v.template === 'string' ? v.template : 'modern') as CVTemplate;
 
@@ -107,7 +108,7 @@ export function useCVVersions() {
 
     const duplicated: CVVersion = {
       ...version,
-      id: crypto.randomUUID(),
+      id: generateId(),
       name: newName || `${version.name} (copie)`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

@@ -1,3 +1,5 @@
+import { generateId } from "@/lib/id";
+
 export interface PersonalInfo {
   firstName: string;
   lastName: string;
@@ -102,7 +104,7 @@ export const defaultCVData: CVData = {
 
 
 export const createNewVersion = (name: string, template: CVTemplate = 'modern'): CVVersion => ({
-  id: crypto.randomUUID(),
+  id: generateId(),
   name,
   template,
   data: structuredClone(defaultCVData),

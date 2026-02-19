@@ -18,6 +18,22 @@ type PrintDialogProps = {
 
 export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialogProps) {
   const [isPrinting, setIsPrinting] = React.useState(false);
+  const isMobilePreview = visualElementId === "cv-preview-mobile";
+
+  const getActiveStylesheetsMarkup = () => {
+    return Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map((node) => node.outerHTML)
+      .join("\n");
+  };
+
+  const getMobilePrintableMarkup = (cvElement: HTMLElement) => {
+    // In mobile preview, the real template sits inside a scaled wrapper.
+    const scaledLayer = cvElement.querySelector<HTMLElement>('div[style*="scale(var(--mobile-scale))"]');
+    if (scaledLayer?.innerHTML) {
+      return scaledLayer.innerHTML;
+    }
+    return cvElement.innerHTML;
+  };
 
   const handlePrint = async () => {
     setIsPrinting(true);
@@ -35,10 +51,127 @@ export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialog
       }
 
       // Get the element's HTML
-      const cvHtml = cvElement.innerHTML;
+      const cvHtml = isMobilePreview ? getMobilePrintableMarkup(cvElement) : cvElement.innerHTML;
+      const inheritedStyles = isMobilePreview ? getActiveStylesheetsMarkup() : "";
 
       // Create the print document with print-optimized styles
-      const printDoc = `<!DOCTYPE html>
+      const printDoc = isMobilePreview
+        ? `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV - Impression</title>
+    ${inheritedStyles}
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            overflow: visible !important;
+        }
+
+        body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+
+        .cv-print-container {
+            width: 210mm !important;
+            min-height: 297mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .cv-print-container * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+
+        .no-print,
+        .print-hide,
+        [class*="hide-print"] {
+            display: none !important;
+        }
+
+        [class*="shadow"] {
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="cv-print-container">
+        ${cvHtml}
+    </div>
+
+    <script>
+        (async function() {
+            function sleep(ms) {
+                return new Promise(function(resolve) {
+                    setTimeout(resolve, ms);
+                });
+            }
+
+            function waitForDomReady() {
+                if (document.readyState === 'interactive' || document.readyState === 'complete') {
+                    return Promise.resolve();
+                }
+                return new Promise(function(resolve) {
+                    document.addEventListener('DOMContentLoaded', resolve, { once: true });
+                });
+            }
+
+            function waitForImages() {
+                var images = Array.from(document.images || []);
+                return Promise.all(images.map(function(img) {
+                    if (img.complete) {
+                        if (typeof img.decode === 'function') {
+                            return img.decode().catch(function() {});
+                        }
+                        return Promise.resolve();
+                    }
+                    return new Promise(function(resolve) {
+                        img.addEventListener('load', resolve, { once: true });
+                        img.addEventListener('error', resolve, { once: true });
+                    });
+                }));
+            }
+
+            try {
+                await waitForDomReady();
+
+                if (document.fonts && document.fonts.ready) {
+                    try {
+                        await document.fonts.ready;
+                    } catch (e) {}
+                }
+
+                await waitForImages();
+                await sleep(300);
+
+                window.focus();
+                window.print();
+            } catch (e) {
+                window.print();
+            }
+        })();
+    <\/script>
+</body>
+</html>`
+        : `<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">

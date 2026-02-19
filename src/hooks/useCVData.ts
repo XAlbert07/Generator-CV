@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CVData, CVTemplate, defaultCVData } from '@/types/cv';
+import { generateId } from '@/lib/id';
 
 const STORAGE_KEY = 'cv-generator-data';
 const TEMPLATE_KEY = 'cv-generator-template';
@@ -43,7 +44,7 @@ export function useCVData() {
       experiences: [
         ...prev.experiences,
         {
-          id: crypto.randomUUID(),
+          id: generateId(),
           company: '',
           position: '',
           startDate: '',
@@ -77,7 +78,7 @@ export function useCVData() {
       education: [
         ...prev.education,
         {
-          id: crypto.randomUUID(),
+          id: generateId(),
           school: '',
           degree: '',
           field: '',
@@ -110,7 +111,7 @@ export function useCVData() {
       ...prev,
       skills: [
         ...prev.skills,
-        { id: crypto.randomUUID(), name: '', level: 3 },
+        { id: generateId(), name: '', level: 3 },
       ],
     }));
   }, []);
@@ -136,7 +137,7 @@ export function useCVData() {
       ...prev,
       languages: [
         ...prev.languages,
-        { id: crypto.randomUUID(), name: '', level: 'Intermédiaire' },
+        { id: generateId(), name: '', level: 'Intermédiaire' },
       ],
     }));
   }, []);
