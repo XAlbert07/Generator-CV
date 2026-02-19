@@ -270,6 +270,27 @@ const DOCX_THEME_BY_TEMPLATE: Record<CVTemplate, DocxTheme> = {
     sidebarFill: "F4F4F5",
     useTwoColumns: false,
   },
+  swiss: {
+    accent: "B91C1C",
+    headerFill: "18181B",
+    headerText: "FFFFFF",
+    sidebarFill: "F5F5F4",
+    useTwoColumns: true,
+  },
+  editorial: {
+    accent: "78716C",
+    headerFill: "F5F5F4",
+    headerText: "292524",
+    sidebarFill: "FFFBEB",
+    useTwoColumns: true,
+  },
+  techmono: {
+    accent: "10B981",
+    headerFill: "0A0A0A",
+    headerText: "A7F3D0",
+    sidebarFill: "18181B",
+    useTwoColumns: true,
+  },
 };
 
 const DOCX_FONT_BY_TEMPLATE: Record<CVTemplate, string> = {
@@ -282,6 +303,9 @@ const DOCX_FONT_BY_TEMPLATE: Record<CVTemplate, string> = {
   corporate: "Calibri",
   elegant: "Garamond",
   ats: "Calibri",
+  swiss: "Arial",
+  editorial: "Garamond",
+  techmono: "Courier New",
 };
 
 const FRENCH_MONTHS_SHORT = [

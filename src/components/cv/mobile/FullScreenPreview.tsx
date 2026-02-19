@@ -11,6 +11,9 @@ import { ProfessionalTemplate } from '@/components/cv/templates/ProfessionalTemp
 import { CorporateTemplate } from '@/components/cv/templates/CorporateTemplate';
 import { ElegantTemplate } from '@/components/cv/templates/ElegantTemplate';
 import { ATSTemplate } from '@/components/cv/templates/ATSTemplate';
+import { SwissGridTemplate } from '@/components/cv/templates/SwissGridTemplate';
+import { EditorialTemplate } from '@/components/cv/templates/EditorialTemplate';
+import { TechMonoTemplate } from '@/components/cv/templates/TechMonoTemplate';
 
 interface FullScreenPreviewProps {
   isOpen: boolean;
@@ -50,6 +53,12 @@ export function FullScreenPreview({
         return <ElegantTemplate data={cvData} sectionOrder={sectionOrder} />;
       case 'ats':
         return <ATSTemplate data={cvData} sectionOrder={sectionOrder} />;
+      case 'swiss':
+        return <SwissGridTemplate data={cvData} sectionOrder={sectionOrder} />;
+      case 'editorial':
+        return <EditorialTemplate data={cvData} sectionOrder={sectionOrder} />;
+      case 'techmono':
+        return <TechMonoTemplate data={cvData} sectionOrder={sectionOrder} />;
       default:
         return <ModernTemplate data={cvData} sectionOrder={sectionOrder} />;
     }

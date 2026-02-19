@@ -8,6 +8,9 @@ import { ProfessionalTemplate } from './templates/ProfessionalTemplate';
 import { CorporateTemplate } from './templates/CorporateTemplate';
 import { ElegantTemplate } from './templates/ElegantTemplate';
 import { ATSTemplate } from './templates/ATSTemplate';
+import { SwissGridTemplate } from './templates/SwissGridTemplate';
+import { EditorialTemplate } from './templates/EditorialTemplate';
+import { TechMonoTemplate } from './templates/TechMonoTemplate';
 interface CVPreviewProps {
   data: CVData;
   template: CVTemplate;
@@ -35,6 +38,12 @@ export function CVPreview({ data, template, sectionOrder }: CVPreviewProps) {
         return <ElegantTemplate data={data} sectionOrder={sectionOrder} />;
       case 'ats':
         return <ATSTemplate data={data} sectionOrder={sectionOrder} />;
+      case 'swiss':
+        return <SwissGridTemplate data={data} sectionOrder={sectionOrder} />;
+      case 'editorial':
+        return <EditorialTemplate data={data} sectionOrder={sectionOrder} />;
+      case 'techmono':
+        return <TechMonoTemplate data={data} sectionOrder={sectionOrder} />;
       default:
         return <ModernTemplate data={data} sectionOrder={sectionOrder} />;
     }

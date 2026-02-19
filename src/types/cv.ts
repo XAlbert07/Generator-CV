@@ -81,7 +81,19 @@ export interface CVVersion {
   updatedAt: string;
 }
 
-export type CVTemplate = 'modern' | 'classic' | 'creative' | 'executive' | 'minimalist' | 'professional' | 'corporate' | 'elegant' | 'ats';
+export type CVTemplate =
+  | 'modern'
+  | 'classic'
+  | 'creative'
+  | 'executive'
+  | 'minimalist'
+  | 'professional'
+  | 'corporate'
+  | 'elegant'
+  | 'ats'
+  | 'swiss'
+  | 'editorial'
+  | 'techmono';
 
 export const defaultCVData: CVData = {
   personalInfo: {

@@ -62,6 +62,24 @@ const templates: { id: CVTemplate; name: string; description: string; colors: st
     description: 'Optimisé pour robots recruteurs',
     colors: ['bg-black', 'bg-white'],
   },
+  {
+    id: 'swiss',
+    name: 'Swiss Grid',
+    description: 'Grille structurée éditoriale',
+    colors: ['bg-red-700', 'bg-zinc-900'],
+  },
+  {
+    id: 'editorial',
+    name: 'Editorial',
+    description: 'Style magazine élégant',
+    colors: ['bg-amber-100', 'bg-stone-700'],
+  },
+  {
+    id: 'techmono',
+    name: 'Tech Mono',
+    description: 'Monospace style terminal',
+    colors: ['bg-zinc-900', 'bg-emerald-500'],
+  },
 ];
 
 export function TemplateSelector({ selected, onChange }: TemplateSelectorProps) {
