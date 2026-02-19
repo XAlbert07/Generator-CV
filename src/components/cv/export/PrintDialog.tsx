@@ -15,7 +15,7 @@ type PrintDialogProps = {
 
 export function PrintDialog({ open, onOpenChange, visualElementId }: PrintDialogProps) {
   const [isPrinting, setIsPrinting] = React.useState(false);
-  const isMobilePreview = visualElementId === "cv-preview-mobile";
+  const isMobilePreview = visualElementId.includes("cv-preview-mobile");
 
   const getActiveStylesheetsMarkup = () => {
     return Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
