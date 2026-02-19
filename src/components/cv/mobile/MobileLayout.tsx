@@ -531,6 +531,7 @@ export function MobileLayout({
         open={showExport}
         onOpenChange={setShowExport}
         cvData={cvData}
+        template={template}
         visualElementId={mobilePrintElementId}
         defaultFilename={defaultFileName}
       />

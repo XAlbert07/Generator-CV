@@ -385,6 +385,7 @@ export default function CVGenerator() {
         open={showExport}
         onOpenChange={setShowExport}
         cvData={cvData}
+        template={template}
         visualElementId="cv-preview"
         defaultFilename={defaultFileName}
       />

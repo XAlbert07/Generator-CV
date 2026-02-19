@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { CVData } from "@/types/cv";
+import type { CVData, CVTemplate } from "@/types/cv";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ type ExportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   cvData: CVData;
+  template: CVTemplate;
   /**
    * Element id to capture for "PDF visuel".
    * Exemple: "cv-preview" (desktop) ou "cv-preview-mobile" (mobile)
@@ -36,10 +37,10 @@ const FONT_OPTIONS: { id: ExportOptions["fontFamily"]; label: string }[] = [
 const FORMAT_OPTIONS: { id: ExportFormat | "pdf_print"; label: string; hint?: string }[] = [
   { id: "pdf_print", label: "PDF (Imprimer)", hint: "🖨️ Meilleure qualité - Impression directe A4" },
   { id: "pdf_ats", label: "PDF ATS (texte)", hint: "Texte sélectionnable + liens cliquables" },
-  { id: "docx", label: "DOCX", hint: "Éditable (Word) + liens cliquables" },
+  { id: "docx", label: "DOCX", hint: "Design rapproché du template + éditable (Word)" },
 ];
 
-export function ExportDialog({ open, onOpenChange, cvData, visualElementId, defaultFilename }: ExportDialogProps) {
+export function ExportDialog({ open, onOpenChange, cvData, template, visualElementId, defaultFilename }: ExportDialogProps) {
   const [format, setFormat] = React.useState<ExportFormat | "pdf_print">("pdf_print");
   const [filename, setFilename] = React.useState(defaultFilename);
   const [marginMm, setMarginMm] = React.useState<number>(10);
@@ -75,7 +76,7 @@ export function ExportDialog({ open, onOpenChange, cvData, visualElementId, defa
       if (format === "pdf_ats") {
         exportAtsPdf(cvData, opts);
       } else if (format === "docx") {
-        await exportDocx(cvData, opts);
+        await exportDocx(cvData, opts, template);
       }
       toast.success("Export terminé");
       onOpenChange(false);
