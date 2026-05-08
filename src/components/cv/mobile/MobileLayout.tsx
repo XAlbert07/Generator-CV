@@ -23,8 +23,18 @@ import { EditorialTemplate } from '@/components/cv/templates/EditorialTemplate';
 import { TechMonoTemplate } from '@/components/cv/templates/TechMonoTemplate';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, ChevronLeft, ChevronRight, Circle, Download, Eye, FolderOpen, RotateCcw } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, Download, Eye, FileText, FolderOpen, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 type MobileWizardStepId = 'profile' | 'experience' | 'details' | 'style' | 'preview';
@@ -140,6 +150,7 @@ export function MobileLayout({
   const [showPreview, setShowPreview] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showVersionsPanel, setShowVersionsPanel] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const mobilePrintElementId = 'cv-preview-mobile-print-source';
 
   const currentStepIndex = MOBILE_STEPS.findIndex((step) => step.id === currentStep);
@@ -241,11 +252,10 @@ export function MobileLayout({
   };
 
   const handleReset = () => {
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) {
-      resetCV();
-      setCurrentStep('profile');
-      toast.info('Données réinitialisées');
-    }
+    resetCV();
+    setCurrentStep('profile');
+    toast.info('Données réinitialisées');
+    setShowResetDialog(false);
   };
 
   const renderStepContent = () => {
@@ -361,10 +371,17 @@ export function MobileLayout({
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-xl border-b border-border/50">
         <div className="container py-3 flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold">CV Pro</h1>
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                <FileText className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <h1 className="text-lg font-bold tracking-tight">
+                CV <span className="gradient-text">Pro</span>
+              </h1>
+            </div>
             <p className="text-xs text-muted-foreground truncate max-w-[180px]">{activeVersion.name}</p>
           </div>
           <div className="flex items-center gap-1">
@@ -378,7 +395,7 @@ export function MobileLayout({
               <span className="text-xs">Versions</span>
             </Button>
             <ThemeToggle />
-            <Button variant="ghost" size="sm" onClick={handleReset} className="text-muted-foreground">
+            <Button variant="ghost" size="sm" onClick={() => setShowResetDialog(true)} className="text-muted-foreground">
               <RotateCcw className="w-4 h-4" />
             </Button>
           </div>
@@ -544,6 +561,25 @@ export function MobileLayout({
         visualElementId={mobilePrintElementId}
         defaultFilename={defaultFileName}
       />
+
+      {/* Reset Confirmation Dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Réinitialiser cette version ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Toutes les informations saisies seront supprimées.
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Réinitialiser
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

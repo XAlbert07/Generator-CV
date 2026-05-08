@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { defaultCVData, defaultSectionOrder } from '@/types/cv';
 import { useCVVersions } from '@/hooks/useCVVersions';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -15,7 +16,17 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { ExportDialog } from '@/components/cv/export/ExportDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Eye, FileText, RotateCcw } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Download, Eye, FileText, RotateCcw, ArrowLeft } from 'lucide-react';
 import { generateId } from '@/lib/id';
 
 import { toast } from 'sonner';
@@ -42,6 +53,7 @@ export default function CVGenerator() {
   const isMobile = useIsMobile();
   const [showPreview, setShowPreview] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   // Helper functions pour mettre à jour les données
@@ -173,16 +185,15 @@ export default function CVGenerator() {
   };
 
   const resetCV = () => {
-    if (confirm('Réinitialiser cette version ?')) {
-      updateActiveVersionData({
-        personalInfo: {},
-        experiences: [],
-        education: [],
-        skills: [],
-        languages: [],
-      } as any);
-      toast.info('Version réinitialisée');
-    }
+    updateActiveVersionData({
+      personalInfo: {},
+      experiences: [],
+      education: [],
+      skills: [],
+      languages: [],
+    } as any);
+    toast.info('Version réinitialisée');
+    setShowResetDialog(false);
   };
 
   // Calculate preview scale based on container width
@@ -209,13 +220,6 @@ export default function CVGenerator() {
     .replace(/\s+/g, '_')
     .replace(/_+/g, '_')
     .replace(/^_+|_+$/g, '') || 'Mon_CV';
-
-  const handleReset = () => {
-    if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) {
-      resetCV();
-      toast.info('Données réinitialisées');
-    }
-  };
 
   // Mobile Layout
   if (isMobile) {
@@ -259,11 +263,19 @@ export default function CVGenerator() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
         <div className="container py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <FileText className="w-6 h-6 text-primary" />
-            <h1 className="text-lg font-semibold">CV Pro</h1>
+            <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+              <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+                <FileText className="w-4.5 h-4.5 text-primary-foreground" />
+              </div>
+              <span className="text-lg font-bold tracking-tight">
+                CV <span className="gradient-text">Pro</span>
+              </span>
+            </Link>
+            
+            <div className="h-5 w-px bg-border hidden sm:block" />
             
             {/* Versions Manager */}
             <VersionsManager
@@ -281,7 +293,7 @@ export default function CVGenerator() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={resetCV}
+              onClick={() => setShowResetDialog(true)}
               className="text-muted-foreground"
             >
               <RotateCcw className="w-4 h-4 mr-1" />
@@ -389,6 +401,25 @@ export default function CVGenerator() {
         visualElementId="cv-preview"
         defaultFilename={defaultFileName}
       />
+
+      {/* Reset Confirmation Dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Réinitialiser cette version ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Toutes les informations saisies dans cette version seront supprimées.
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={resetCV} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Réinitialiser
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

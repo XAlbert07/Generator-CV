@@ -8,6 +8,7 @@ import {
   defaultSectionOrder,
 } from '@/types/cv';
 import { generateId } from '@/lib/id';
+import { toast } from 'sonner';
 
 const VERSIONS_KEY = 'cv-versions';
 const ACTIVE_VERSION_KEY = 'cv-active-version-id';
@@ -135,7 +136,7 @@ export function useCVVersions() {
   // Supprimer une version
   const deleteVersion = useCallback((versionId: string) => {
     if (versions.length <= 1) {
-      alert('Vous devez garder au moins une version');
+      toast.warning('Vous devez garder au moins une version');
       return;
     }
 

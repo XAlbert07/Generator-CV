@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import {
   DndContext,
@@ -17,7 +22,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, RotateCcw, Layers, Briefcase, GraduationCap, Sparkles, Languages, ChevronUp, ChevronDown } from "lucide-react";
+import { GripVertical, RotateCcw, Layers, Briefcase, GraduationCap, Sparkles, Languages, ChevronUp, ChevronDown, Settings2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type LayoutOrganizerProps = {
@@ -267,30 +272,49 @@ export function LayoutOrganizer({
     return arrayMove(arr, fromIndex, toIndex);
   };
 
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
     <div className={cn("form-section space-y-4", className)}>
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <h3 className="cv-section-title">Organisation & priorité</h3>
+          <h3 className="cv-section-title flex items-center gap-2">
+            <Settings2 className="w-5 h-5 text-primary" />
+            Organisation & priorité
+          </h3>
           <p className="text-sm text-muted-foreground">
             {isMobile 
               ? "Utilise les flèches pour réorganiser les éléments"
-              : "Réorganise par glisser-déposer"
+              : "Réorganise l'ordre des sections et le contenu"
             }
           </p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onSectionOrderChange(defaultSectionOrder)}
-          className="shrink-0"
-        >
-          <RotateCcw className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Réinitialiser</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {isOpen && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onSectionOrderChange(defaultSectionOrder)}
+            >
+              <RotateCcw className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Réinitialiser</span>
+            </Button>
+          )}
+          <CollapsibleTrigger asChild>
+            <Button type="button" variant="ghost" size="sm">
+              {isOpen ? (
+                <><ChevronUp className="h-4 w-4 mr-1" /><span className="text-xs">Réduire</span></>
+              ) : (
+                <><ChevronDown className="h-4 w-4 mr-1" /><span className="text-xs">Développer</span></>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
       </div>
 
+      <CollapsibleContent className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="targetRole">Poste visé (optionnel)</Label>
@@ -587,6 +611,8 @@ export function LayoutOrganizer({
           )}
         </TabsContent>
       </Tabs>
+      </CollapsibleContent>
     </div>
+    </Collapsible>
   );
 }

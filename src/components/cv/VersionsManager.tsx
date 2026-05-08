@@ -16,6 +16,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 import { ChevronDown, Plus, Copy, Pencil, Trash2, FileText, Check } from 'lucide-react';
 import { toast } from 'sonner';
@@ -41,6 +51,8 @@ export function VersionsManager({
 }: VersionsManagerProps) {
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [showRenameDialog, setShowRenameDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [newVersionName, setNewVersionName] = useState('');
   const [renameVersionId, setRenameVersionId] = useState<string>('');
   const [renameValue, setRenameValue] = useState('');
@@ -74,10 +86,17 @@ export function VersionsManager({
   };
 
   const handleDelete = (versionId: string, versionName: string) => {
-    if (confirm(`Supprimer "${versionName}" ?`)) {
-      onDeleteVersion(versionId);
+    setDeleteTarget({ id: versionId, name: versionName });
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    if (deleteTarget) {
+      onDeleteVersion(deleteTarget.id);
       toast.info('Version supprimée');
     }
+    setShowDeleteDialog(false);
+    setDeleteTarget(null);
   };
 
   const openRenameDialog = (versionId: string, currentName: string) => {
@@ -226,6 +245,25 @@ export function VersionsManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* AlertDialog: Supprimer */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette version ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              La version « {deleteTarget?.name} » sera définitivement supprimée.
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

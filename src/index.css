@@ -1,84 +1,84 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@400;600;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;500;600;700&family=Calibri:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@400;600;700&family=Merriweather:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 
-
-/* CV Generator Design System */
+/* CV Generator Design System — Refonte DA Indigo/Navy */
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    --background: 220 20% 97%;
+    --foreground: 224 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 224 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 224 47% 11%;
 
-    --primary: 160 84% 39%;
+    --primary: 234 89% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 27%;
+    --secondary: 220 26% 14%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 20% 94%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 160 60% 45%;
+    --accent: 234 60% 63%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 160 84% 39%;
+    --border: 220 13% 90%;
+    --input: 220 13% 90%;
+    --ring: 234 89% 56%;
 
     --radius: 0.75rem;
 
     /* CV Template Colors */
-    --cv-modern-accent: 160 84% 39%;
-    --cv-classic-accent: 222 47% 20%;
+    --cv-modern-accent: 234 89% 56%;
+    --cv-classic-accent: 224 47% 20%;
     --cv-creative-accent: 262 83% 58%;
-    
+
     /* Custom shadows */
-    --shadow-soft: 0 4px 20px -2px hsl(222 47% 11% / 0.08);
-    --shadow-card: 0 8px 30px -4px hsl(222 47% 11% / 0.12);
-    --shadow-elevated: 0 20px 50px -10px hsl(222 47% 11% / 0.15);
+    --shadow-soft: 0 1px 3px 0 hsl(224 47% 11% / 0.06), 0 1px 2px -1px hsl(224 47% 11% / 0.06);
+    --shadow-card: 0 4px 14px -2px hsl(224 47% 11% / 0.08), 0 2px 6px -2px hsl(224 47% 11% / 0.04);
+    --shadow-elevated: 0 20px 50px -12px hsl(224 47% 11% / 0.18);
+    --shadow-glow: 0 0 40px -8px hsl(234 89% 56% / 0.25);
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
+    --background: 224 47% 7%;
+    --foreground: 220 20% 96%;
 
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
+    --card: 224 47% 10%;
+    --card-foreground: 220 20% 96%;
 
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 224 47% 10%;
+    --popover-foreground: 220 20% 96%;
 
-    --primary: 160 84% 45%;
+    --primary: 234 89% 63%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 26% 16%;
+    --secondary-foreground: 220 20% 96%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 16% 15%;
+    --muted-foreground: 220 9% 55%;
 
-    --accent: 160 60% 50%;
+    --accent: 234 60% 68%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 160 84% 45%;
+    --border: 220 16% 17%;
+    --input: 220 16% 17%;
+    --ring: 234 89% 63%;
   }
 }
 
@@ -93,11 +93,11 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   .font-display {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Playfair Display', Georgia, serif;
   }
 
   /* PDF Optimization */
@@ -107,7 +107,7 @@
       print-color-adjust: exact !important;
       color-adjust: exact !important;
     }
-    
+
     body {
       print-color-adjust: exact;
     }
@@ -118,23 +118,58 @@
   .cv-section-title {
     @apply text-lg font-semibold tracking-tight;
   }
-  
+
   .form-section {
     @apply rounded-xl bg-card p-4 md:p-6 border border-border/50;
     box-shadow: var(--shadow-soft);
   }
-  
+
   .preview-container {
     @apply bg-card rounded-xl overflow-hidden;
     box-shadow: var(--shadow-card);
   }
-  
+
   .template-card {
     @apply rounded-lg border-2 border-transparent cursor-pointer transition-all duration-300 hover:border-primary/50;
   }
-  
+
   .template-card.active {
     @apply border-primary ring-2 ring-primary/20;
+  }
+
+  /* Landing page components */
+  .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(234 89% 56% / 0.08) 0%,
+      hsl(262 83% 58% / 0.05) 50%,
+      hsl(234 89% 56% / 0.03) 100%
+    );
+  }
+
+  .dark .hero-gradient {
+    background: linear-gradient(
+      135deg,
+      hsl(234 89% 56% / 0.15) 0%,
+      hsl(262 83% 58% / 0.08) 50%,
+      hsl(234 89% 56% / 0.05) 100%
+    );
+  }
+
+  .glass-card {
+    @apply bg-card/70 backdrop-blur-xl border border-border/50 rounded-2xl;
+    box-shadow: var(--shadow-card);
+  }
+
+  .feature-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/40 rounded-xl p-6 transition-all duration-300;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .feature-card:hover {
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+    @apply border-primary/30;
   }
 }
 
@@ -142,13 +177,22 @@
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
-  
+
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
   }
-  
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 }

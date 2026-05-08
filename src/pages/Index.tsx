@@ -1,7 +1,7 @@
-import CVGenerator from './CVGenerator';
+import LandingPage from './LandingPage';
 
 const Index = () => {
-  return <CVGenerator />;
+  return <LandingPage />;
 };
 
 export default Index;
