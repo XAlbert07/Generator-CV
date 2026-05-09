@@ -33,6 +33,8 @@ export function useCVVersions() {
               education: Array.isArray(v.data.education) ? v.data.education : [],
               skills: Array.isArray(v.data.skills) ? v.data.skills : [],
               languages: Array.isArray(v.data.languages) ? v.data.languages : [],
+              projects: Array.isArray(v.data.projects) ? v.data.projects : [],
+              certifications: Array.isArray(v.data.certifications) ? v.data.certifications : [],
             }
           : structuredClone(defaultCVData);
 
@@ -178,6 +180,14 @@ export function useCVVersions() {
     }
   }, [activeVersion, updateVersion]);
 
+  // Importer des versions (depuis un fichier JSON)
+  const importVersions = useCallback((imported: CVVersion[]) => {
+    const normalized = normalizeVersions(imported);
+    if (normalized.length === 0) return;
+    setVersions(normalized);
+    setActiveVersionId(normalized[0].id);
+  }, [normalizeVersions]);
+
   return {
     versions,
     activeVersion,
@@ -190,5 +200,6 @@ export function useCVVersions() {
     updateActiveVersionData,
     updateActiveVersion,
     updateActiveVersionTemplate,
+    importVersions,
   };
 }

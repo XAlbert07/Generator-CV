@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { Skill, Language } from '@/types/cv';
 import { Wrench, Languages, Plus, Trash2 } from 'lucide-react';
 
@@ -24,6 +25,14 @@ const languageLevels = [
   'Courant',
   'Natif',
 ];
+
+const skillLevelLabels: Record<number, string> = {
+  1: 'Débutant',
+  2: 'Basique',
+  3: 'Intermédiaire',
+  4: 'Avancé',
+  5: 'Expert',
+};
 
 export function SkillsForm({
   skills,
@@ -58,21 +67,38 @@ export function SkillsForm({
 
         <div className="space-y-3">
           {skills.map((skill) => (
-            <div key={skill.id} className="flex items-center gap-3">
-              <Input
-                placeholder="Nom de la compétence"
-                value={skill.name}
-                onChange={(e) => onUpdateSkill(skill.id, { name: e.target.value })}
-                className="flex-1"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onRemoveSkill(skill.id)}
-                className="text-destructive hover:text-destructive shrink-0"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+            <div key={skill.id} className="p-3 rounded-lg bg-muted/30 border border-border/50 space-y-3">
+              <div className="flex items-center gap-3">
+                <Input
+                  placeholder="Nom de la compétence"
+                  value={skill.name}
+                  onChange={(e) => onUpdateSkill(skill.id, { name: e.target.value })}
+                  className="flex-1"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onRemoveSkill(skill.id)}
+                  className="text-destructive hover:text-destructive shrink-0"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+              {/* Skill level slider */}
+              <div className="flex items-center gap-3 px-1">
+                <span className="text-xs text-muted-foreground w-12 shrink-0">Niveau</span>
+                <Slider
+                  value={[skill.level || 3]}
+                  onValueChange={([value]) => onUpdateSkill(skill.id, { level: value })}
+                  min={1}
+                  max={5}
+                  step={1}
+                  className="flex-1"
+                />
+                <span className="text-xs font-medium text-primary w-24 text-right">
+                  {skillLevelLabels[skill.level || 3]}
+                </span>
+              </div>
             </div>
           ))}
         </div>

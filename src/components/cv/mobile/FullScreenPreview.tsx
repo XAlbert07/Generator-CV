@@ -1,19 +1,8 @@
-import { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { CVData, CVTemplate, type CVSectionId } from '@/types/cv';
 import { Button } from '@/components/ui/button';
 import { X, Download, Share2 } from 'lucide-react';
-import { ModernTemplate } from '@/components/cv/templates/ModernTemplate';
-import { ClassicTemplate } from '@/components/cv/templates/ClassicTemplate';
-import { CreativeTemplate } from '@/components/cv/templates/CreativeTemplate';
-import { ExecutiveTemplate } from '@/components/cv/templates/ExecutiveTemplate';
-import { MinimalistTemplate } from '@/components/cv/templates/MinimalistTemplate';
-import { ProfessionalTemplate } from '@/components/cv/templates/ProfessionalTemplate';
-import { CorporateTemplate } from '@/components/cv/templates/CorporateTemplate';
-import { ElegantTemplate } from '@/components/cv/templates/ElegantTemplate';
-import { ATSTemplate } from '@/components/cv/templates/ATSTemplate';
-import { SwissGridTemplate } from '@/components/cv/templates/SwissGridTemplate';
-import { EditorialTemplate } from '@/components/cv/templates/EditorialTemplate';
-import { TechMonoTemplate } from '@/components/cv/templates/TechMonoTemplate';
+import { getTemplateComponent } from '@/lib/templateRegistry';
 
 interface FullScreenPreviewProps {
   isOpen: boolean;
@@ -32,37 +21,7 @@ export function FullScreenPreview({
   sectionOrder,
   onExport,
 }: FullScreenPreviewProps) {
-  // Render the correct template
-  const renderTemplate = () => {
-    switch (template) {
-      case 'modern':
-        return <ModernTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'classic':
-        return <ClassicTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'creative':
-        return <CreativeTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'executive':
-        return <ExecutiveTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'minimalist':
-        return <MinimalistTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'professional':
-        return <ProfessionalTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'corporate':
-        return <CorporateTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'elegant':
-        return <ElegantTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'ats':
-        return <ATSTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'swiss':
-        return <SwissGridTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'editorial':
-        return <EditorialTemplate data={cvData} sectionOrder={sectionOrder} />;
-      case 'techmono':
-        return <TechMonoTemplate data={cvData} sectionOrder={sectionOrder} />;
-      default:
-        return <ModernTemplate data={cvData} sectionOrder={sectionOrder} />;
-    }
-  };
+  const Template = getTemplateComponent(template);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -209,7 +168,13 @@ export function FullScreenPreview({
                   left: 0,
                 }}
               >
-                {renderTemplate()}
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-[297mm] bg-white">
+                    <div className="text-gray-400 text-sm animate-pulse">Chargement...</div>
+                  </div>
+                }>
+                  <Template data={cvData} sectionOrder={sectionOrder} />
+                </Suspense>
               </div>
             </div>
           </div>

@@ -22,7 +22,7 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, RotateCcw, Layers, Briefcase, GraduationCap, Sparkles, Languages, ChevronUp, ChevronDown, Settings2 } from "lucide-react";
+import { GripVertical, RotateCcw, Layers, Briefcase, GraduationCap, Sparkles, Languages, ChevronUp, ChevronDown, Settings2, FolderKanban, Award } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type LayoutOrganizerProps = {
@@ -41,6 +41,8 @@ const SECTION_META: Record<CVSectionId, { label: string; icon: React.ReactNode }
   education: { label: "Formation", icon: <GraduationCap className="h-4 w-4" /> },
   skills: { label: "Compétences", icon: <Sparkles className="h-4 w-4" /> },
   languages: { label: "Langues", icon: <Languages className="h-4 w-4" /> },
+  projects: { label: "Projets", icon: <FolderKanban className="h-4 w-4" /> },
+  certifications: { label: "Certifications", icon: <Award className="h-4 w-4" /> },
 };
 
 function safeOverId(event: DragEndEvent): string | null {

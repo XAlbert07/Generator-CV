@@ -45,15 +45,39 @@ export interface Language {
   level: string;
 }
 
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  url?: string;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  issuer: string;
+  date: string;
+  url?: string;
+}
+
 export interface CVData {
   personalInfo: PersonalInfo;
   experiences: Experience[];
   education: Education[];
   skills: Skill[];
   languages: Language[];
+  projects?: Project[];
+  certifications?: Certification[];
 }
 
-export type CVSectionId = 'summary' | 'experience' | 'education' | 'skills' | 'languages';
+export type CVSectionId =
+  | 'summary'
+  | 'experience'
+  | 'education'
+  | 'skills'
+  | 'languages'
+  | 'projects'
+  | 'certifications';
 
 export const defaultSectionOrder: CVSectionId[] = [
   'summary',
@@ -70,11 +94,11 @@ export interface CVVersion {
   template: CVTemplate;
   data: CVData;
   /**
-   * Poste visé (optionnel). Sert de contexte pour la “priorité” et l’export.
+   * Poste visé (optionnel). Sert de contexte pour la "priorité" et l'export.
    */
   targetRole?: string;
   /**
-   * Ordre d’affichage des sections (hors en-tête infos perso).
+   * Ordre d'affichage des sections (hors en-tête infos perso).
    */
   sectionOrder?: CVSectionId[];
   createdAt: string;
@@ -93,7 +117,18 @@ export type CVTemplate =
   | 'ats'
   | 'swiss'
   | 'editorial'
-  | 'techmono';
+  | 'techmono'
+  // New templates
+  | 'medical'
+  | 'legal'
+  | 'teacher'
+  | 'commerce'
+  | 'freelance'
+  | 'student'
+  | 'infographic'
+  | 'prestige'
+  | 'academic'
+  | 'nordic';
 
 export const defaultCVData: CVData = {
   personalInfo: {
@@ -112,6 +147,8 @@ export const defaultCVData: CVData = {
   education: [],
   skills: [],
   languages: [],
+  projects: [],
+  certifications: [],
 };
 
 

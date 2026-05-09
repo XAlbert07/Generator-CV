@@ -9,13 +9,27 @@ import { PersonalInfoForm } from '@/components/cv/PersonalInfoForm';
 import { ExperienceForm } from '@/components/cv/ExperienceForm';
 import { EducationForm } from '@/components/cv/EducationForm';
 import { SkillsForm } from '@/components/cv/SkillsForm';
+import { ProjectsForm } from '@/components/cv/ProjectsForm';
+import { CertificationsForm } from '@/components/cv/CertificationsForm';
 import { TemplateSelector } from '@/components/cv/TemplateSelector';
 import { LayoutOrganizer } from '@/components/cv/LayoutOrganizer';
 import { CVPreview } from '@/components/cv/CVPreview';
+import { CVCompletionIndicator } from '@/components/cv/CVCompletionIndicator';
+import { PresetSelector } from '@/components/cv/PresetSelector';
+import { DesktopFullPreview } from '@/components/cv/DesktopFullPreview';
+import type { SmartPreset } from '@/lib/smartPresets';
+import { SAMPLE_CV_DATA } from '@/lib/sampleData';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { ExportDialog } from '@/components/cv/export/ExportDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Download, Eye, FileText, RotateCcw, ArrowLeft } from 'lucide-react';
+import { Download, Eye, FileText, RotateCcw, Maximize2, Wand2, MoreVertical, Upload } from 'lucide-react';
 import { generateId } from '@/lib/id';
 
 import { toast } from 'sonner';
@@ -43,6 +57,7 @@ export default function CVGenerator() {
     updateActiveVersionData,
     updateActiveVersion,
     updateActiveVersionTemplate,
+    importVersions,
   } = useCVVersions();
 
   const cvData = activeVersion?.data || defaultCVData;
@@ -54,7 +69,33 @@ export default function CVGenerator() {
   const [showPreview, setShowPreview] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showFullPreview, setShowFullPreview] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const fillSampleData = () => {
+    updateActiveVersionData(structuredClone(SAMPLE_CV_DATA));
+    toast.success('Données d\'exemple chargées — explorez les templates !');
+  };
+
+  // Show preset selector for fresh/empty CVs
+  const isEmptyCV = !cvData.personalInfo.firstName && !cvData.personalInfo.lastName
+    && cvData.experiences.length === 0 && cvData.education.length === 0;
+  const [presetDismissed, setPresetDismissed] = useState(false);
+  const showPresetSelector = isEmptyCV && !presetDismissed;
+
+  const handlePresetSelect = (preset: SmartPreset) => {
+    updateActiveVersionTemplate(preset.recommendedTemplates[0]);
+    updateActiveVersion({
+      sectionOrder: preset.sectionOrder,
+      targetRole: preset.label,
+    });
+    setPresetDismissed(true);
+    toast.success(`Preset "${preset.label}" appliqué — template, sections et ordre configurés !`);
+  };
+
+  const handlePresetSkip = () => {
+    setPresetDismissed(true);
+  };
 
   // Helper functions pour mettre à jour les données
   const updatePersonalInfo = (info: Partial<typeof cvData.personalInfo>) => {
@@ -184,6 +225,60 @@ export default function CVGenerator() {
     });
   };
 
+  // Projects CRUD
+  const addProject = () => {
+    updateActiveVersionData({
+      ...cvData,
+      projects: [
+        ...(cvData.projects || []),
+        { id: generateId(), name: '', description: '', url: '' },
+      ],
+    });
+  };
+
+  const updateProject = (id: string, data: any) => {
+    updateActiveVersionData({
+      ...cvData,
+      projects: (cvData.projects || []).map(p =>
+        p.id === id ? { ...p, ...data } : p
+      ),
+    });
+  };
+
+  const removeProject = (id: string) => {
+    updateActiveVersionData({
+      ...cvData,
+      projects: (cvData.projects || []).filter(p => p.id !== id),
+    });
+  };
+
+  // Certifications CRUD
+  const addCertification = () => {
+    updateActiveVersionData({
+      ...cvData,
+      certifications: [
+        ...(cvData.certifications || []),
+        { id: generateId(), name: '', issuer: '', date: '', url: '' },
+      ],
+    });
+  };
+
+  const updateCertification = (id: string, data: any) => {
+    updateActiveVersionData({
+      ...cvData,
+      certifications: (cvData.certifications || []).map(c =>
+        c.id === id ? { ...c, ...data } : c
+      ),
+    });
+  };
+
+  const removeCertification = (id: string) => {
+    updateActiveVersionData({
+      ...cvData,
+      certifications: (cvData.certifications || []).filter(c => c.id !== id),
+    });
+  };
+
   const resetCV = () => {
     updateActiveVersionData({
       personalInfo: {},
@@ -191,6 +286,8 @@ export default function CVGenerator() {
       education: [],
       skills: [],
       languages: [],
+      projects: [],
+      certifications: [],
     } as any);
     toast.info('Version réinitialisée');
     setShowResetDialog(false);
@@ -220,6 +317,11 @@ export default function CVGenerator() {
     .replace(/\s+/g, '_')
     .replace(/_+/g, '_')
     .replace(/^_+|_+$/g, '') || 'Mon_CV';
+
+  // Preset selector (for empty CVs)
+  if (showPresetSelector) {
+    return <PresetSelector onSelect={handlePresetSelect} onSkip={handlePresetSkip} />;
+  }
 
   // Mobile Layout
   if (isMobile) {
@@ -262,7 +364,7 @@ export default function CVGenerator() {
   // Desktop Layout (original)
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Header — épuré */}
       <header className="sticky top-0 z-50 bg-card/80 backdrop-blur-xl border-b border-border/50">
         <div className="container py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -288,17 +390,11 @@ export default function CVGenerator() {
               onSwitchVersion={switchVersion}
             />
           </div>
+
           <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowResetDialog(true)}
-              className="text-muted-foreground"
-            >
-              <RotateCcw className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline">Reset</span>
-            </Button>
+            <CVCompletionIndicator data={cvData} />
+
+            {/* Toggle aperçu mobile/tablette */}
             <Button
               variant="outline"
               size="sm"
@@ -308,6 +404,74 @@ export default function CVGenerator() {
               <Eye className="w-4 h-4 mr-1" />
               {showPreview ? 'Formulaire' : 'Aperçu'}
             </Button>
+
+            {/* Menu secondaire */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={fillSampleData}>
+                  <Wand2 className="w-4 h-4 mr-2" />
+                  Remplir un exemple
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => {
+                  // Export JSON inline
+                  try {
+                    const json = JSON.stringify({ _meta: { app: 'CV Pro', version: '2.0', exportDate: new Date().toISOString() }, versions }, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = `cv-backup-${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    toast.success('Sauvegarde téléchargée');
+                  } catch { toast.error("Erreur lors de l'export"); }
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Sauvegarder (JSON)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  const input = document.createElement('input');
+                  input.type = 'file'; input.accept = '.json';
+                  input.onchange = (e: any) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      try {
+                        const data = JSON.parse(ev.target?.result as string);
+                        const vArr = data.versions || (Array.isArray(data) ? data : null);
+                        if (vArr) { importVersions(vArr); toast.success('Données importées'); }
+                        else toast.error('Format invalide');
+                      } catch { toast.error('Fichier JSON invalide'); }
+                    };
+                    reader.readAsText(file);
+                  };
+                  input.click();
+                }}>
+                  <Upload className="w-4 h-4 mr-2" />
+                  Restaurer (JSON)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowResetDialog(true)} className="text-destructive focus:text-destructive">
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Réinitialiser
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <div className="flex items-center justify-between w-full">
+                    <span className="text-sm">Thème</span>
+                    <ThemeToggle />
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* CTA principal */}
             <Button onClick={() => setShowExport(true)} size="sm">
               <Download className="w-4 h-4 mr-1" />
               Exporter
@@ -332,11 +496,13 @@ export default function CVGenerator() {
             />
             
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 mb-4">
+              <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 mb-4">
                 <TabsTrigger value="personal" className="text-xs sm:text-sm">Profil</TabsTrigger>
                 <TabsTrigger value="experience" className="text-xs sm:text-sm">Expérience</TabsTrigger>
                 <TabsTrigger value="education" className="text-xs sm:text-sm">Formation</TabsTrigger>
                 <TabsTrigger value="skills" className="text-xs sm:text-sm">Compétences</TabsTrigger>
+                <TabsTrigger value="projects" className="text-xs sm:text-sm">Projets</TabsTrigger>
+                <TabsTrigger value="certifications" className="text-xs sm:text-sm">Certif.</TabsTrigger>
               </TabsList>
               
               <TabsContent value="personal">
@@ -376,6 +542,24 @@ export default function CVGenerator() {
                   onRemoveLanguage={removeLanguage}
                 />
               </TabsContent>
+
+              <TabsContent value="projects">
+                <ProjectsForm
+                  projects={cvData.projects || []}
+                  onAdd={addProject}
+                  onUpdate={updateProject}
+                  onRemove={removeProject}
+                />
+              </TabsContent>
+
+              <TabsContent value="certifications">
+                <CertificationsForm
+                  certifications={cvData.certifications || []}
+                  onAdd={addCertification}
+                  onUpdate={updateCertification}
+                  onRemove={removeCertification}
+                />
+              </TabsContent>
             </Tabs>
           </div>
 
@@ -385,7 +569,19 @@ export default function CVGenerator() {
             className={`lg:w-1/2 xl:w-2/5 ${!showPreview && 'hidden lg:block'}`}
           >
             <div className="sticky top-20">
-              <div className="bg-muted/50 rounded-xl p-4 overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground font-medium">Aperçu en direct</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFullPreview(true)}
+                  className="h-7 text-xs"
+                >
+                  <Maximize2 className="w-3.5 h-3.5 mr-1" />
+                  Plein écran
+                </Button>
+              </div>
+              <div className="bg-muted/50 rounded-xl p-4 overflow-hidden" style={{ height: 'calc(100vh - 150px)' }}>
                 <CVPreview data={cvData} template={template} sectionOrder={sectionOrder} />
               </div>
             </div>
@@ -420,6 +616,15 @@ export default function CVGenerator() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Desktop Full-Screen Preview */}
+      <DesktopFullPreview
+        isOpen={showFullPreview}
+        onClose={() => setShowFullPreview(false)}
+        data={cvData}
+        template={template}
+        sectionOrder={sectionOrder}
+      />
     </div>
   );
 }
