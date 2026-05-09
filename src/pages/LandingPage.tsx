@@ -67,7 +67,7 @@ const STEPS = [
   {
     number: '02',
     title: 'Choisissez votre design',
-    description: 'Parcourez 12 templates professionnels et trouvez celui qui correspond à votre secteur.',
+    description: 'Parcourez 22 templates professionnels et trouvez celui qui correspond à votre secteur.',
   },
   {
     number: '03',
@@ -176,7 +176,7 @@ export default function LandingPage() {
               Des designs qui <span className="gradient-text">impressionnent</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              12 templates soigneusement conçus pour mettre en valeur votre parcours, quel que soit votre secteur.
+              22 templates soigneusement conçus pour mettre en valeur votre parcours, quel que soit votre secteur.
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export default function LandingPage() {
           <div className="text-center mt-10">
             <Link to="/create">
               <Button variant="outline" size="lg" className="gap-2 font-medium">
-                Voir les 12 templates
+                Voir les 22 templates
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
