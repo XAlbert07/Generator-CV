@@ -28,7 +28,7 @@ const TEMPLATE_PREVIEWS = [
 const FEATURES = [
   {
     icon: <Palette className="w-6 h-6" />,
-    title: '12 templates premium',
+    title: '22 templates premium',
     description: 'Des designs soignés et professionnels, du classique au créatif, pour tous les secteurs.',
   },
   {
@@ -115,7 +115,7 @@ export default function LandingPage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
               <Sparkles className="w-4 h-4" />
-              Gratuit • Sans inscription • 12 templates
+              Gratuit • Sans inscription • 22 templates
             </div>
 
             {/* Heading */}
@@ -128,7 +128,7 @@ export default function LandingPage() {
 
             {/* Subtitle */}
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Un générateur intuitif avec aperçu en temps réel, 12 designs premium et export PDF gratuit.
+              Un générateur intuitif avec aperçu en temps réel, 22 designs premium et export PDF gratuit.
               Décrochez votre prochain entretien avec un CV qui fait la différence.
             </p>
 
